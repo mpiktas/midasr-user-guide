@@ -16,5 +16,6 @@ midasr-user-guide.R
 #Emacs and knitr files
 *.#
 *.Rt
+*.swp
 cache/
 figure/
