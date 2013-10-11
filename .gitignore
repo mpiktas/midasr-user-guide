@@ -3,3 +3,18 @@
 
 # Example code in package build process
 *-Ex.R
+
+#Tangled code
+midasr-user-guide.R
+
+#Sweave unnecessary files
+*.aux
+*.log
+*.out
+*.tex
+
+#Emacs and knitr files
+*.#
+*.Rt
+cache/
+figure/
