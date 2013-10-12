@@ -433,37 +433,37 @@ As you can see the syntax of the function \code{midas_r} is similar to the stand
 
 The main difference from the function \code{nls} is that there is a greater choice of numerical optimisation algorithms. The function \code{midas_r} is written in a way that in theory it can use any \proglang{R} optimisation function. The choice is controlled via \code{Ofunction} argument. Currently it is possible to use functions \code{optim} and \code{nls} which are present in standard \proglang{R} installation and function \code{spg} from the package \code{BB}. The additional arguments to the aforementioned functions can be specified directly in the call to \code{midas_r}. So for example if we want to use the optimisation algorithm of Nelder and Mead, which is the default option in function \code{optim} we use the following code
 <<eval=FALSE,echo=TRUE,cache=FALSE, results="markup", tidy=FALSE>>=
-eq.r<-midas_r(y~trend+mls(x,0:7,4,nealmon)+mls(z,0:16,12,nealmon),
+eq.r2<-midas_r(y~trend+mls(x,0:7,4,nealmon)+mls(z,0:16,12,nealmon),
               start=list(x=c(1,-0.5),z=c(2,0.5,-0.1)),
               Ofunction="optim", method="Nelder-Mead")
 @ 
 If we want to use  Golub-Pereyra algorithm for partially linear least-squares models implemented in function \code{nls} we use the following code
 <<eval=FALSE,echo=TRUE,cache=FALSE, results="markup",tidy=FALSE>>=
-eq.r<-midas_r(y~trend+mls(x,0:7,4,nealmon)+mls(z,0:16,12,nealmon),
+eq.r2<-midas_r(y~trend+mls(x,0:7,4,nealmon)+mls(z,0:16,12,nealmon),
               start=list(x=c(1,-0.5), z=c(2,0.5,-0.1)),              
               Ofunction="nls", method="plinear")
 @ 
 
 It is possible to reestimate the NLS problem with the different algorithm using as starting values the final solution of the previous algorithm. For example it is known, that the default algorithm in \code{nls} is sensitive to starting values. So first we can use the standard Nelder-Mead algorithm to find ``more feasible'' starting values and then use the \code{nls} to get the final result:
 <<eval=FALSE,echo=TRUE,cache=TRUE, results="markup",tidy=FALSE>>=
-eq.r<-midas_r(y~trend+mls(x,0:7,4,nealmon)+mls(z,0:16,12,nealmon),
+eq.r2<-midas_r(y~trend+mls(x,0:7,4,nealmon)+mls(z,0:16,12,nealmon),
               start=list(x=c(1,-0.5),z=c(2,0.5,-0.1)),
               Ofunction="optim",method="Nelder-Mead")
-eq.r<-midas_r(eq.r,Ofunction="nls")
+eq.r2<-midas_r(eq.r2,Ofunction="nls")
 @ 
 
 The output of the optimisation function used can be found by inspecting the element \code{opt} of \code{midas_r} output.
 <<eval=TRUE,echo=TRUE,cache=TRUE, results="markup", tidy=FALSE>>=
-eq.r<-midas_r(y~trend+mls(x,0:7,4,nealmon)+mls(z,0:16,12,nealmon),
+eq.r2<-midas_r(y~trend+mls(x,0:7,4,nealmon)+mls(z,0:16,12,nealmon),
               start=list(x=c(1,-0.5),z=c(2,0.5,-0.1)),
               Ofunction="optim", method="Nelder-Mead")
-eq.r$opt
+eq.r2$opt
 @ 
 Here we observe that Nelder-Mead algorithm evaluated the cost function 502 times.
 
 The optimisation functions in \proglang{R} report the status of the convergence of optimisation algorithm by the numeric constant, 0 indicating succesful convergence. This code is reported as the element \code{convergence} of the \code{midas_r} output.
 <<eval=TRUE,echo=TRUE,cache=FALSE, results="markup", tidy=FALSE>>=
-eq.r$convergence
+eq.r2$convergence
 @ 
 In this case the convergence was not succesfull. The help page of function \code{optim} indicates that convergence code 1 means that iteration limit was reached.
 
@@ -480,7 +480,7 @@ nealmon.gradient <- function(p,d,m) {
 @ 
 The naming convention \code{restriction_name.gradient} is important, currently this is the way \code{midas_r} ``knows'' about the gradient functions. To use this function for optimisation it is necessary to set \code{user.gradient=TRUE} in call to \code{midas_r}:
 <<eval=TRUE,echo=TRUE,cache=TRUE,results="markup",tidy=FALSE>>=
-eq.r<-midas_r(y~trend+mls(x,0:7,4,nealmon)+mls(z,0:16,12,nealmon),
+eq.r2<-midas_r(y~trend+mls(x,0:7,4,nealmon)+mls(z,0:16,12,nealmon),
               start=list(x=c(1,-0.5),z=c(2,0.5,-0.1)),
               user.gradient=TRUE)
 @ 
@@ -513,7 +513,7 @@ nealmon(p=c(1,-0.5),d=4)
 @ 
 twice ($d/m=2$), as implied by the number of periods at higher-frequency (\code{d=8}) and the frequency ratio (\code{m=4}). In this way, function \code{amweights} can be used to define explicitly a new functional constraint relying on the relationship \eqref{eq6}. Alternatively, one can indicate directly within function \code{midas_r} that the aggregates-based restriction must be used as follows
 <<echo=TRUE,cache=TRUE, results="hide">>=
-eq.r<-midas_r(y~trend+mls(x,0:7,4,amweights,nealmon,"C")+mls(z,0:16,12,nealmon),start=list(x=c(1,-0.5),z=c(2,0.5,-0.1)))
+eq.r2<-midas_r(y~trend+mls(x,0:7,4,amweights,nealmon,"C")+mls(z,0:16,12,nealmon),start=list(x=c(1,-0.5),z=c(2,0.5,-0.1)))
 @ 
 where the first variable follows and aggregates-based MIDAS restriction scheme. Notice that the selection of alternative types "A" and "B" are connected with specifications having a larger number of parameters (see Table 3), hence the list of starting values needs to be adjusted to account for an increase in the number of (potentially unequal) impact parameters. %To simplify the usage, the starting values of a single period are used for all the lags. %[?? O kodel tas pats nepadaryta ir su poveikio parametrais? Manau, reikia naudoti vienodus ir cia??]
 
