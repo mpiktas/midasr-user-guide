@@ -50,7 +50,8 @@ URL:\url{http://mif.vu.lt/~zemlys/}
 
 \section{Introduction}
 
-This paper\footnote{This is a version 2 of the document, published in 2013-12-15} introduces a \proglang{R} package \pkg{midasr} for regression modelling with mixed frequency data. \cite{ghysels:2013} has developed a package for \proglang{MATLAB} that deals with the estimation and information criteria-based specification of the mixed frequency data sampling (MIDAS) regressions as well as forecasting and nowcasting of low frequency series. In a slightly more general framework of regressions with functional constraints on parameters, package \pkg{midasr} not only provides similar functionality within a standard \proglang{R} framework of model specification comparable to that available in the usual functions \code{lm} or \code{nls}, but also deals with an extended adequacy analysis of the empirical MIDAS models. 
+This paper%\footnote{This is a version 2 of the document, published in 2013-12-15}
+introduces a \proglang{R} package \pkg{midasr} for regression modelling with mixed frequency data. \cite{ghysels:2013} has developed a package for \proglang{MATLAB} that deals with the estimation and information criteria-based specification of the mixed frequency data sampling (MIDAS) regressions as well as forecasting and nowcasting of low frequency series. In a slightly more general framework of regressions with functional constraints on parameters, package \pkg{midasr} not only provides similar functionality within a standard \proglang{R} framework of model specification comparable to that available in the usual functions \code{lm} or \code{nls}, but also deals with an extended adequacy analysis of the empirical MIDAS models. 
 
 The key feature of the package is its flexibility in terms of the employed model, which allows for the:
 \begin{itemize}
@@ -668,13 +669,13 @@ forecast(eq.rb,newdata=list(x=newx,z=newz,trend=251))
 
 In MIDAS literature it is more common to estimate models which do not require new data for forecasting
 \begin{align*}
-y_{t+h}&=2+0.1t+\sum_{j=0}^7\beta_j^{(1)}x_{4t-j}+\sum_{j=0}^{16}\beta_j^{(2)}z_{12t-j}+\e_{t+h},
+y_{t+\ell}&=2+0.1t+\sum_{j=0}^7\beta_j^{(1)}x_{4t-j}+\sum_{j=0}^{16}\beta_j^{(2)}z_{12t-j}+\e_{t+\ell},
 \end{align*}
-where $h$ is the desired forecasting horizon. This model can be rewritten as
+where $\ell$ is the desired forecasting horizon. This model can be rewritten as
 \begin{align*}
-y_{t}&=2+0.1t+\sum_{j=4h}^7\beta_j^{(1)}x_{4t-j}+\sum_{j=12h}^{16}\beta_j^{(2)}z_{12t-j}+\e_t,
+y_{t}&=2+0.1t+\sum_{j=4\ell}^{7+4\ell}\beta_j^{(1)}x_{4t-j}+\sum_{j=12\ell}^{16+12\ell}\beta_j^{(2)}z_{12t-j}+\e_t,
 \end{align*}
-Then it can be estimated using \code{midas_r}. For such model we can get forecasts $\hat{y}_{T+h|T},...,\hat{y}_{T+1|T}$ using the explanatory variable data up to low frequency index $T$. To get these forecasts using function \code{forecast} we need to supply \code{NA} values for explanatory variables. Here is the example for $h=1$: 
+Then it can be estimated using \code{midas_r}. For such model we can get forecasts $\hat{y}_{T+\ell|T},...,\hat{y}_{T+1|T}$ using the explanatory variable data up to low frequency index $T$. To get these forecasts using function \code{forecast} we need to supply \code{NA} values for explanatory variables. Here is the example for $\ell=1$: 
 <<echo=TRUE,cache=TRUE,results="markup">>=
 eq.f <- midas_r(y~trend+mls(x,4+0:7,4,nealmon)+mls(z,12+0:16,12,nealmon),
               start=list(x=c(1,-0.5),z=c(2,0.5,-0.1)))
