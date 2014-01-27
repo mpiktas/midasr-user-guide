@@ -4,6 +4,8 @@
 \usepackage{multirow}
 \usepackage{dcolumn}
 \usepackage{rotating}
+\usepackage{natbib}
+\newcommand{\citeasnoun}{\cite}
 
 \newcommand{\alal}{\mbox{\boldmath$\alpha$}}
 \newcommand{\bebe}{\mbox{\boldmath$\beta$}}
@@ -32,7 +34,8 @@
 \Shorttitle{R package \pkg{midasr}}
 
 \Abstract{
-  The implementation of MIDAS approach in the \proglang{R} package \pkg{midasr} is described within the framework of regressions with functional constraints on parameters.
+Regression models involving data sampled at different frequencies are of general interest. In this document the \proglang{R} package \pkg{midasr} is described within a MIDAS regression framework  with functional constraints on parameters put forward in work by \citeasnoun{ghysels_etal_midas-02a}, \citeasnoun{ghysels_etal_midas-joe} and
+\citeasnoun{andreou:rmm}.
 }
 \Keywords{MIDAS, specification test}
 \Plainkeywords{MIDAS, specification test}
@@ -44,65 +47,65 @@ Naugarduko g. 24, Vilnius, Lithuania\\
 E-mail: \email{vaidotas.zemlys@mif.vu.lt}\\
 URL:\url{http://mif.vu.lt/~zemlys/}
 }
-%\Submitdate{2013-10-11}
+%\Submitdate{2014-01-28}
 %% need no \usepackage{Sweave.sty}
 \begin{document}
 
 \section{Introduction}
 
-This paper%\footnote{This is a version 2 of the document, published in 2013-12-15}
-introduces a \proglang{R} package \pkg{midasr} for regression modelling with mixed frequency data. \cite{ghysels:2013} has developed a package for \proglang{MATLAB} that deals with the estimation and information criteria-based specification of the mixed frequency data sampling (MIDAS) regressions as well as forecasting and nowcasting of low frequency series. In a slightly more general framework of regressions with functional constraints on parameters, package \pkg{midasr} not only provides similar functionality within a standard \proglang{R} framework of model specification comparable to that available in the usual functions \code{lm} or \code{nls}, but also deals with an extended adequacy analysis of the empirical MIDAS models. 
+Regression models involving data sampled at different frequencies are of general interest. In this document we introduce a \proglang{R} package \pkg{midasr} for the regression modeling with the mixed frequency data based on a framework put forward in recent work by \citeasnoun{ghysels_etal_midas-02a}, \citeasnoun{ghysels_etal_midas-joe} and
+\citeasnoun{andreou:rmm} using so called MIDAS, meaning Mi(xed) Da(ta) S(ampling), regressions.\footnote{\cite{ghysels:2013} also developed a package for \proglang{MATLAB} which deals with the estimation and information criteria-based specification of MIDAS regressions as well as forecasting and nowcasting of low frequency series.} 
 
-The key feature of the package is its flexibility in terms of the employed model, which allows for the:
+In a general framework of regressions with functional constraints on parameters, the \pkg{midasr} package not only provides similar functionality within a standard \proglang{R} framework of the model specification comparable to that available in the usual functions \code{lm} or \code{nls}, but also deals with an extended model specification analysis for MIDAS regressions.
+
+Several recent surveys on the topic of MIDAS are worth mentioning at the outset. They are: \cite{andreou2011forecasting} who review more extensively some of the material summarized in this document, \cite{armesto2010forecasting} who provide a very simple introduction to MIDAS regressions and finally \cite{ghysels_valkanov_chap} who discuss volatility models and mixed data sampling.
+
+Econometric analysis of MIDAS regressions appears in \cite{ghysels:mrf}, \cite{andreou:rmm}, \cite{bai:kalman},
+\cite{kvedaras-regression}, \cite{rodriguez2010mixed}, \cite{wohlrabe2009forecasting}, among others.
+
+MIDAS regression can also be viewed as a reduced form representation of the linear projection which emerges from a state space model approach - by reduced form we mean that the MIDAS regression does not require the specification of a full state space system of equations.
+\cite{bai:kalman} show that in some cases the MIDAS regression is an exact representation of the Kalman filter, in other cases it involves approximation errors which are typically small. The Kalman filter, while clearly optimal as far as linear projections goes, has several disadvantages (1) it is more prone to specification errors as a full system of measurement and state equations is required and as a consequence (2) requires a lot more parameters, which in turn results in (3) computational complexities which often limit the scope of applications. In contrast, MIDAS regressions - combined with forecast combination schemes if large data sets are involved (see \cite{AGK_macro}) are computationally easy to implement and more
+prone to specification errors.
+
+The key feature of the package is its flexibility in terms of the model formulation and estimation, which allows for the:
 \begin{itemize}
-\item estimation of regression models with its parameters defined (restricted) by a certain functional constraint, %which is twice differentiable with respect to the underlying hyper-parameters. 
-which can be selected from a standard list or be customized using a standard \proglang{R} \code{function};
-\item parsimonious aggregation-linked restrictions (as e.g. in \citealp{ghysels:2013}) as a special case; 
+\item estimation of regression models with its parameters defined (restricted) by a certain functional constraint,
+which can be selected from a standard list or can be customized using a standard \proglang{R} \code{function};
+\item parsimonious aggregation-linked restrictions (as e.g.\ in \citealp{ghysels:2013}) as a special case;
 \item estimation of MIDAS models with many variables and (numerous) different frequencies;
 \item constrained, partially constrained, or unconstrained estimation of the model;
 \item various mixtures of restrictions/weighting schemes and also lag orders as they can be specific to each series;
-\item statistical testing of adequacy of specification and the imposed functional constraint;
-\item information criteria and adequacy testing based selection of models; 
+\item statistical testing for the adequacy of the model specification and the imposed functional constraint;
+\item information criteria and testing-based selection of models;
 \item forecasting and nowcasting functionality, including various forecast combinations.
 \end{itemize}
-The package deals with any specification of a potentially mixed-frequency regression model which can be represented as
-\begin{equation}\label{eq1}
-\alpha(B)y_{t}= \bebe(L)^\prime\xx_{t,0}+\e_t,\ \ E\left(\e_t\big|\yy_{t,1},\{\xx_{t,j}\}_{j=0}^{k}\right)=0,\\
-\end{equation}
-where  $y_t$ denotes a dependent variable which usually is of the lowest available frequency among the series involved in model. 
-The vector 
+
+Suppose $\{y_t, t\in \mathbb{Z}\}$ is a univariate process observed at low frequency. Lags of the process are denoted by $By_t$ = $y_{t-1},$ where $B$ is the low frequency lag operator. A MIDAS regression involves linear projections using stochastic processes $\{x_{\tau}^{(i)}, \tau \in \mathbb{Z}\},$
+$i=0,\dots,h,$  observed at a higher frequency, i.e.\ for each low
+frequency period $t=t_0$ we observe the process $x_\tau^{(i)}$ at $m_i\in
+\mathbb{N}$ high frequency periods $\tau=(t_0-1)m_i+1,\dots,t_0m_i$. Throughout the article we represent $i$-th high frequency period $\tau$ in terms of low frequency period $t$ as
+$\tau=(t-1)m_i+j,$ $j=1,\dots,m_i$. Note that this notation does not exclude the case $m_i=1$. In that case the high frequency process $x_{\tau}^{(i)}$ is observed at the same frequency as the low frequency process $y_t$. However we require that $m_i\ge
+1,$ such that the process $y_t$ is observed at the lowest frequency. Lags of the processes $x_{\tau}^{(i)}$ are denoted by $Lx^{(i)}x_{\tau}=x_{\tau-1},$ where $L$ is the high frequency lag operator, which operates on the lag irrespective of the frequency of the process.
+
+The package deals with any specification of mixed-frequency
+regression model which can be represented as
+\begin{align}\label{l:eqintro}
+    y_t-\alpha_1y_{t-1}-\dots-\alpha_py_{t-p}=\sum_{i=0}^{h}\sum_{j=0}^{k_i}\beta_{j}^{(i)}x_{tm_i-j}^{(i)}+\eps_t,
+\end{align}
+where we require
 \begin{align*}
-\xx_{t,0}=\left(x_{tm_0}^{(0)},\dots,x_{tm_i}^{(i)},\dots,x_{tm_h}^{(h)}\right)^\prime,\ m_i\in\mathbb{N},\ i\in\{0,1,\dots,h\},\ h\in\mathbb{N},\ 
-\end{align*}
-comprises all the different explanatory variables (not including their lags) that potentially are of various frequencies. 
+    E(\eps_t|y_{t-1},\dots,y_{t-p},x^{(0)}_{tm_0},\dots,x^{(0)}_{tm_0-k_i},\dots,x^{(h)}_{tm_h},\dots,x^{(h)}_{tm_h-k_h})=0,
+\end{align*} so that the equation \eqref{l:eqintro} is identified as a projection equation.
 
-The quantities $\alpha(B)$ and $\bebe(L)$ are the lag polynomials:
-\begin{align*}
-\alpha(z)&=1-\sum_{j=1}^{p}\alpha_jz^j, \\
-\bebe(z)&= \sum_{j=0}^{k}\bebe_jz^j,\ \bebe_j=\left(\beta_j^{(0)},\dots,\beta_j^{(i)},\dots,\beta_j^{(h)}\right)^\prime,\ i\in\{0,1,\dots,h\},\ h\in\mathbb{N},\ k\in\mathbb{N}.
-\end{align*}
-The usual lag operator $B$ operates at the frequency of $y_t$, whereas the lag operator $L$ is non-standard in that it operates on the lag irrespective of the frequency of a component in $\xx_{t,0}$ producing all the components in it lagged by a frequency-specific lag as follows
-\begin{align*}
-\forall\ j\in\mathbb{Z},\ \ \xx_{t,j}&:=L^j\xx_{t,0}=\left(x_{tm_0-j}^{(0)},\dots,x_{tm_i-j}^{(i)},\dots,x_{tm_h-j}^{(h)}\right)^\prime.
-\end{align*}
-To simplify notation, but without loss of generality, a single order of the lag polynomials is used with $k$ hence standing for the maximum lag order. If orders of some components of $\bebe(z)$ are smaller, it would only imply that some coefficients of the polynomial equal zero.
+The model stated in the equation \eqref{l:eqintro} can be estimated in the usual time series regression fashion or using a Bayesian approach. However, the number of parameters in this model $d$ = $p+\sum_{i=0}^hk_i$ can be very large in terms of the number $n$ of available observations of $y_t$\footnote{In the MIDAS literature it is common to have $k_i\ge m_i$ and $m_i$ can be large, for example monthly versus daily data}. Since the estimation of the model can
+easily become infeasible, whenever either larger differences in frequencies or more variables and/or higher lag orders prevail, \cite{ghysels_etal_midas-02a} introduced a sufficiently flexible parametric restriction to be imposed on the original parameters,
+\begin{align}\label{l:eqres}
+    \beta_{j}^{(i)}=f_{i}(\gaga_i,j), \; j=0,\dots,k_i,\; \gaga_i=(\gamma_{1}^{(i)},\dots,\gamma_{q_i}^{(i)}), \; q_i\in\mathbb{N}.
+\end{align}
 
-The  total number of different explanatory variables is $h+1$. If only one explanatory variable per each frequency were used in model \eqref{eq1}, then $h=H$, where $H\in\mathbb{N}$ stands for the number of variables that are of different frequencies higher than $y_t$. To avoid heavy indexing, we employ this convention hereafter, unless explicitly stated otherwise. In such a case, an index $i\in\{0,1,\dots,H\}$ corresponds to each different frequency with $i=0$ denoting a series of the same frequency as $y_t$, while $i\not=0$ corresponds to variables of other frequencies. $m_i,\ i\in\{0,1,\dots,H\}$ denotes a frequency-specific frequency ratio defined as the number of periods of $i^{th}$ frequency available per each period of $y_t$ with e.g. $m_0=1$. It is obvious that $\yy_{t,j}:=(y_{t-j},y_{t-j-1},\dots,y_{t-j-p+1})^\prime$ can be included into vector $\xx_{t,j}$ as an explanatory variable of frequency $0$. We separate the autoregressive terms for later convenience of presentation. 
+This approach greatly reduces the number of parameters to be estimated, from $d$ to $q=\sum_{i=0}^{h_i}q_i,$ which is assumed to be always considerably less than the number of observations available at the lowest frequency. This gain is offset by the fact that \eqref{l:eqintro} becomes non-linear model, however if
+the parameters of an underlying data generating process did follow a certain functional constraint which is perfectly or well approximated by a constraint function chosen by a researcher, then significant efficiency gains could be achieved from the imposed constraints. Figure \ref{fig:fig1} plots the out-of-sample prediction precision (left figure) and the parameter estimation precision (right figure) in an unconstrained and constrained simple model with correct and approximate restrictions (see Appendix A for details).
 
-For each $i\in\{0,1,\dots,h\}$, $f_i:\ \mathbb{R}\times\mathbb{N}\rightarrow\mathbb{R}$ represents a functional constraint on the original parameters $\{\bebe_j\}_{j=0}^k$ of the model\footnote{The package allows also to restrict the parameters of polynomial $\alpha(z)$ in the same way, but for presentational simplicity we do not discuss this restriction here.}.
-\begin{align*}
-\beta_{j}^{(i)}&=f_{i}(\gaga_{i};j), \ \ \gaga_{i}=\left(\gamma_1^{(i)},\dots,\gamma_r^{(i)},\dots,\gamma_{q_i}^{(i)}\right)^\prime,\ \{{\gamma_r^{(i)}}\}_{i=0,r=1}^{h,q_i}\subset\gaga\in\mathbb{R}^{q},\ q_i,q\in\mathbb{N}.
-\end{align*}
-
-We will usually require the existence of the second derivative of  functional constraint with respect to its hyper-parameters i.e. $\frac{\partial^2 f_i}{\partial \gaga_i\partial \gaga_i^\prime}$, but the function can be even discontinuous with respect to the lag index $j\in\mathbb{N}$ which allows for various non-smooth functions in terms of the lag index. The functional constraints can vary with each variable and/or frequency, thus we use $\gaga$ to represent a vector of all parameters of a restricted model (unique hyper-parameters and parameters in $\alpha(z)$), with $q:=\dim(\gaga)$ standing for their total number. 
-
-As will be shown in the next section, all variants of the usual linear (in terms of variables) MIDAS model are covered by regression \eqref{eq1} specifying only particular functional constraints. If each restriction function were just an identity mapping, it would yield an unrestricted MIDAS model\footnote{See \cite{foroni:2012}.} (U-MIDAS) that can be estimated either in the Classical framework or using the Bayesian approach.
-
-
-\section{Theory}\label{Theory}
-
-\subsection{General considerations}
-Whenever model \eqref{eq1} is considered under the Classical approach, the need for a functional constraint in regressions with mixed frequency variables stems from the fact that the total number of unrestricted parameters $d:=p+(k+1)(h+1)$ can be very large in terms of the number $n$ of available observations of $y_t$.  Since the estimation of the model can easily become infeasible, whenever either larger differences in frequencies or more variables and/or higher lag orders prevail, \cite{ghysels_touch_2002} introduced a sufficiently flexible parametric restriction to be imposed on the original parameters, thus greatly reducing the number of parameters to be estimated: from $d$, which potentially is infinite, to much fewer number of parameters in a restricted model $q$ which is assumed to be always considerably less than the number of observations available at the lowest frequency. If the parameters of an  underlying data generating process did follow a certain functional constraint that is perfectly or well approximated by a constraint function chosen by a researcher, then full or great efficiency gains could be expected to be gained from the imposed constraints. Figure \ref{fig:fig1}  plots the standard error of estimation (left figure) and a mean squared error (MSE) of the 2-norm of parameter estimates in an unconstrained and constrained simple model with correct and approximate restriction (see its characterization in Appendix A).
 \begin{figure}[htbp]
   \label{fig:fig1}
 <<echo=FALSE,fig.show="hold",fig.height=3.5>>=
@@ -978,112 +981,6 @@ The data for this DGP was generated for low frequency sample sizes 50, 100, 200,
 
 This process was repeated 1000 times. The points in the figure are the averages of the replications. Full code can be found in package \pkg{midasr} website.
 
-%Convert to  bibtex
-%\bibliography{midas}
+\bibliography{guideR}
 
-\begin{thebibliography}{99}
-
-\bibitem[Bilinskas and Zemlys, 2013]{bilinskas:2013} Bilinskas, B., and Zemlys, V. (2013).
-\newblock Testing the Functional Constraints on Parameters in Regression Models with Cointegrated Variables of Different Frequency. 
-\newblock \emph{Submitted, available upon a request.}  
-  
-%\bibitem[Andreou et al., 2010]{andreou:2010} Andreou, E., Ghysels, E., and Kourtellos, A. (2010).
-%\newblock Regression models with mixed sampling frequencies.
-%\newblock \emph{Journal of Econometrics} {\bf 158}: 246--261. 
-%\newblock {\em Journal of Econometrics}, 158(2):246--261. Oct., 2010.
-
-
-%\bibitem[Andrews, 1987]{andrews:1987} Andrews, D.W.K. (1987).
-%\newblock Asymptotic results for generalized Wald tests.
-%\newblock \emph{Econometric Theory} {\bf 3}: 348358. 
-
-%\bibitem[Andrews, 1991]{andrews:1991} Andrews, D.W.K. (1991).
-%\newblock Heteroskedasticity and Autocorrelation Consistent Covariance Matrix Estimation.
-%\newblock \emph{Econometrica} {\bf 59}: 817--858. 
-%\newblock {\em Journal of Econometrics}, 158(2):246--261. Oct., 2010.
-
-%\bibitem[Andrews and Monahan, 1992]{andrews:1992} Andrews, D.W.K., and  Monahan, J.C. (1992).
-%\newblock An Improved Heteroskedasticity and Autocorrelation Consistent Covariance Matrix Estimator.
-%\newblock \emph{Econometrica} {\bf 60}: 953--966. 
-%\newblock {\em Journal of Econometrics}, 158(2):246--261. Oct., 2010.
-
-
-\bibitem[Clements and Galv\~ao, 2008]{clements:2008} Clements, M.P., and Galv\~ao, A.B. (1991).
-\newblock Macroeconomic Forecasting With Mixed-Frequency Data: Forecasting Output Growth in the United States.
-\newblock \emph{Journal of Business }\&{ Economic Statistics} {\bf 26(4)}: 546--554. 
-
-\bibitem[Foroni et al., 2012]{foroni:2012} Foroni, C., Marcellino, M., and Schumacher, C. (2012).
-\newblock U-MIDAS: MIDAS regressions with unrestricted lag polynomials.
-\newblock CEPR Discussion Papers No 8828.
-
-\bibitem[Ghysels et al., 2002]{ghysels_touch_2002} Ghysels, E., Santa-Clara, P., and Valkanov, R. (2002).
-\newblock The {MIDAS} touch: Mixed data sampling regression models.
-\newblock Working paper, UNC and UCLA.
-% http://www.cirano.qc.ca/pdf/publication/2004s-20.pdf
-
-\bibitem[Ghysels et al., 2007]{ghysels_midas_2007} Ghysels, E., Sinko, A., and Valkanov, R. (2007).
-\newblock {MIDAS} regressions: Further results and new directions$^*$.
-\newblock \emph{Econometric Reviews} {\bf 26}: 53--90.
-%\newblock {\em Econometric Reviews}, 26(1):53--90. Feb., 2007.
-
-
-\bibitem[Kvedaras and Ra{\v c}kauskas, 2010]{kvedaras_regression_2010} Kvedaras, V., and Ra{\v c}kauskas, A. (2010).
-\newblock Regression models with variables of different frequencies: The case   of a fixed frequency ratio.
-\newblock \emph{Oxford Bulletin of Economics and Statistics} {\bf 72}: 600--620.
-%\newblock {\em Oxford Bulletin of Economics and Statistics}, 72(5):600--620. Oct., 2010.
-
-\bibitem[Kvedaras et al, 2013]{kvedaras:2013b} Kvedaras, V., Bilinskas, B. and Zemlys, V. (2013).
-\newblock Testing the functional constraints on parameters in cointegrated MIDAS regressions.
-\newblock \emph{Work in progress.}
-
-\bibitem[Kvedaras and Zemlys, 2012]{kvedaras:2012} Kvedaras, V., and Zemlys, V. (2012).
-\newblock Testing the functional constraints on parameters in regressions with variables of different frequency.
-\newblock \emph{Economics Letters} {\bf 116}: 250-254.
-
-\bibitem[Kvedaras and Zemlys, 2013]{kvedaras:2013} Kvedaras, V., and Zemlys, V. (2013).
-\newblock The statistical content and empirical testing of the MIDAS restrictions
-\newblock \emph{Submitted, available upon a request.}
-
-%\bibitem[Miller, 2012]{miller:2012} Miller, J.I. (2012).
-%\newblock Cointegrating MiDaS Regressions and a MiDaS Test.
-%\newblock {Department of Economics, University of Missouri, Discussion Paper}.
-
-%\bibitem[Newey and West, 1987]{newey:1987} Newey, W.K., and West, K.D. (1987).
-%\newblock A Simple, Positive-Definite, Heteroskedasticity and Autocorrelation Consistent Covariance Matrix.
-%\newblock \emph{Econometrica} {\bf 55}: 703-708.
-
-%\bibitem[Newey and West, 1994]{newey:1994} Newey, W.K., and West, K.D. 1994,
-%\newblock Automatic lag selection in covariance matrix estimation.
-%\newblock \emph{Review of Economic Studies} 61(4), 631-654.
-
-
-\bibitem[Ghysels, 2013]{ghysels:2013} Ghysels, E. (2013).
-\newblock Matlab Toolbox for Mixed Sampling Frequency Data Analysis using \proglang{MIDAS} Regression Models.
-\newblock Unpublished manuscript. July 25, 2013 (Version 7). 
-
-%\bibitem[White, 1980]{white:1980} White, H. 1980,
-%\newblock A Heteroskedasticity-Consistent Covariance Matrix and a Direct test for Heteroskedasticity.
-%\newblock {Econometrica} 48, 817--838.
-
-%\bibitem[White, 1981]{white_consequences_1981} White, H. 1981,
-%\newblock Consequences and detection of misspecified nonlinear regression models.
-%\newblock {Journal of the American Statistical Association} 76, 419--433.
-%\newblock {\em Journal of the American Statistical Association}, 76(374):419--433. June, 1981.
-
-%\bibitem[White, 2000]{white_asymptotic_2000} White, H. 2000,
-%\newblock {Asymptotic theory for econometricians.}
-%\newblock Revised Edition, Academic Press, San Diego, etc.
-
-\bibitem[Zeileis, 2004]{zeileis:2004} Zeileis, A. (2004).
-\newblock Econometric Computing with HC and HAC Covariance Matrix Estimators.
-\newblock \emph{Journal of Statistical Software} {\bf 11}: 1--17.
-
-
-%\bibitem[Wohlrabe, 2009]{wholrabe:2009} Wohlrabe, K. 2009,
-%\newblock Forecasting with mixed-frequency time series models.
-%\newblock Ph. D. Dissertation Ludwig-Maximilians-Universitat Munchen, 2009, http://edoc.ub.uni-muenchen.de/9681/.
-
-\end{thebibliography}
-
-%\section{Appendix}
 \end{document}
