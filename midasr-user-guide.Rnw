@@ -460,14 +460,14 @@ we get the following result
 <<echo=TRUE, cache=TRUE, results="markup">>=
 fmls(x,k=2,m=3)
 @ 
-i.e. three variables (a contemporaneous and two lags) with four low-frequency observations ($n=12/m$). 
+i.e.\ three variables (a contemporaneous and two lags) with four low-frequency observations ($n=12/m$).
 
-Function \code{mls} is slightly more flexible as the lags included can start from a given order rather than from zero, whereas function \code{fmls} uses a full lag structure. \code{dmls} performs in addition a first-order differencing of the data which is convenient when working with integrated series.
+Function \code{mls} is slightly more flexible as the lags included can start from a given order rather than from zero, whereas the function \code{fmls} uses a full lag structure. \code{dmls} performs in addition a first-order differencing of the data which is convenient when working with integrated series.
 
-A couple of aspects should be taken into account when working with series of different frequencies.
+A couple of issues should be taken into account when working with series of different frequencies.
 \begin{itemize}
 \item It is assumed that the numbers of observations of different frequencies match exactly through the frequency ratio ($n_i=nm_i$), and the first and last observations of each series of different frequency are correspondingly aligned (possibly using \code{NA} to account for some missing observations for series of higher frequency).
-\item Because of different lengths of series of various frequencies, the data in the model cannot be kept in one \code{data.frame}. An \proglang{R} object \code{list} needs to bee used if one intends to keep the data in a single object, but it is not required for the further modelling.  
+\item Because of different lengths of series of various frequencies, the data in the model cannot be kept in one \code{data.frame}. An \proglang{R} object \code{list} needs to bee used if one intends to keep the data in a single object, but it is not required for the further modeling.
 \end{itemize}
 
 \subsection{An example of simulated MIDAS regression}\label{DGP}
@@ -478,18 +478,19 @@ y_t&=2+0.1t+\sum_{j=0}^7\beta_j^{(1)}x_{4t-j}+\sum_{j=0}^{16}\beta_j^{(2)}z_{12t
 x_{\tau_1}&\sim n.i.d.(0,1), \ \ z_{\tau_2}\sim n.i.d.(0,1), \ \ \e_t\sim n.i.d.(0,1),\\
 \end{aligned}
 \end{equation}
-where $(x_{\tau_1},z_{\tau_2},\e_t)$ are independent for any  $({\tau_1},{\tau_2},t)\in\mathbb{Z}^3$, and
+where $(x_{\tau_1},z_{\tau_2},\e_t)$ are independent for any  $({\tau_1},{\tau_2},t)\in\mathbb{Z}^3,$ and
 $$
 \beta_j^{(i)}=\gamma_0^{(i)}\frac{\exp\left(\sum_{s=1}^{q_i-1}\gamma_{s}^{(i)}j^s\right)}{\sum_{j=0}^{d_i-1}\exp\left(\sum_{s=1}^{q_i-1}\gamma_{s}^{(i)}j^s\right)},\ i=1,2,
 $$
-where $d_1=k_1+1=8$ is a multiple of the frequency ratio $m_1=4$, whereas $d_2=k_2+1=17$ is not a multiple of $m_2=12$. Here $q_1=2$, $q_2=3$ with parametrizations 
+where $d_1=k_1+1=8$ is a multiple of the frequency ratio $m_1=4,$ whereas $d_2=k_2+1=17$ is not a multiple of $m_2=12.$ Here $q_1=2,$ $q_2=3$ with parameterizations
 $$
 \begin{aligned}
 \gaga_1&=(1,-0.5)^\prime,\\
 \gaga_2&=(2,0.5,-0.1)^\prime,\\
 \end{aligned}
 $$
-that yield the shapes of impact as plotted in Figure \ref{fig:fig2}.
+which yield the shapes of impact as plotted in Figure \ref{fig:fig2}.
+
 \begin{figure}[t]
 <<echo=FALSE,fig.show="hold",fig.height=3.5>>=
 plot(x=0:16,nealmon(p=c(2,0.5,-0.1),d=17),type="l",xlab="High frequency lag",ylab="Weights",lty=2)
@@ -514,17 +515,17 @@ fn.z <- nealmon(p=c(2,0.5,-0.1),d=17)
 ## Simulated low-frequency series (e.g. yearly)
 y<-2+0.1*trend+mls(x,0:7,4)%*%fn.x+mls(z,0:16,12)%*%fn.z+rnorm(n)
 @ 
-
 It is of interest to note that the impact of variable $x$ can be represented using aggregates-based MIDAS, whereas the impact of $z$ cannot.
 
 \subsection{Some specification examples of MIDAS regressions}
-Suppose now that we have (only) observations of $y$, $x$, and $z$ that are stored as vectors, matrices, time series, or list objects in \proglang{R}, and our intention is to estimate a MIDAS regression model as in eq. \eqref{eq9}:
+Suppose now that we have (only) observations of $y,$ $x,$ and $z$ which are stored as vectors, matrices, time series, or list objects in \proglang{R}, and our intention is to estimate a MIDAS regression model as in equation \eqref{eq9}:
 \begin{itemize}
-\item[a)] without restricting the parameters (as in U-MIDAS) and using the OLS; 
-\item[b)] with the exponential Almon lag polynomial constraint on parameters (as in function \code{nealmon}) and using the NLS.
+\item[a)] without restricting the parameters (as in U-MIDAS) and using the OLS;
+\item[b)] with the exponential Almon lag polynomial constraint on parameters (as in the function \code{nealmon}) and using the NLS.
 \end{itemize}
 
 The OLS estimation as in case a) is straightforwardly performed using
+
 <<echo=TRUE,cache=TRUE, results="hide">>=
 eq.u<-lm(y~trend+mls(x,k=0:7,m=4)+mls(z,k=0:16,m=12))
 @ 
@@ -533,7 +534,7 @@ or, equivalently
 eq.u<-midas_r(y~trend+mls(x,0:7,4)+mls(z,0:16,12),start=NULL)
 @ 
 
-The following \proglang{R} code estimates the constrained case b) using function \code{midas_r} and reports the NLS estimates $\widehat{\gaga}$ of hyper-parameters with the related summary statistics.
+The following \proglang{R} code estimates the constrained case b) using the function \code{midas_r} and reports the NLS estimates $\widehat{\gaga}$ of hyper-parameters with the related summary statistics.
 <<echo=TRUE,cache=TRUE, results="markup">>=
 eq.r<-midas_r(y~trend+mls(x,0:7,4,nealmon)+mls(z,0:16,12,nealmon),start=list(x=c(1,-0.5),z=c(2,0.5,-0.1)))
 summary(eq.r)
@@ -541,7 +542,7 @@ summary(eq.r)
 
 As you can see the syntax of the function \code{midas_r} is similar to the standard \proglang{R} function \code{nls}. The model is specified via familiar \code{formula} interface. The lags included and functional restriction used can be individual to each variable and are specified within the respective \code{mls}, \code{fmls}, or \code{dmls} function used with \code{midas_r}. It is necessary to provide a list of starting values for each variable with restricted coefficients, since it implicitly defines the number of hyper-parameters of the constraint functions to be used for each series.
 
-The main difference from the function \code{nls} is that there is a greater choice of numerical optimisation algorithms. The function \code{midas_r} is written in a way that in theory it can use any \proglang{R} optimisation function. The choice is controlled via \code{Ofunction} argument. Currently it is possible to use functions \code{optim} and \code{nls} which are present in standard \proglang{R} installation and function \code{spg} from the package \code{BB}. The additional arguments to the aforementioned functions can be specified directly in the call to \code{midas_r}. So for example if we want to use the optimisation algorithm of Nelder and Mead, which is the default option in function \code{optim} we use the following code
+The main difference with the function \code{nls} is that there is a greater choice of numerical optimization algorithms. The function \code{midas_r} is written in a way that in theory it can use any \proglang{R} optimization function. The choice is controlled via \code{Ofunction} argument. Currently it is possible to use functions \code{optim} and \code{nls} which are present in a standard \proglang{R} installation and function \code{spg} from the package \code{BB}. The additional arguments to the aforementioned functions can be specified directly in the call to \code{midas_r}. So for example if we want to use the optimization algorithm of Nelder and Mead, which is the default option in the function \code{optim} we use the following code
 <<eval=FALSE,echo=TRUE,cache=FALSE, results="markup", tidy=FALSE>>=
 eq.r2<-midas_r(y~trend+mls(x,0:7,4,nealmon)+mls(z,0:16,12,nealmon),
               start=list(x=c(1,-0.5),z=c(2,0.5,-0.1)),
