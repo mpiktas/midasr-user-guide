@@ -55,7 +55,7 @@ URL:\url{http://mif.vu.lt/~zemlys/}
 \section{Introduction}
 
 Regression models involving data sampled at different frequencies are of general interest. In this document we introduce a \proglang{R} package \pkg{midasr} for the regression modeling with the mixed frequency data based on a framework put forward in recent work by \citeasnoun{ghysels_etal_midas-02a}, \citeasnoun{ghysels_etal_midas-joe} and
-\citeasnoun{andreou:rmm} using so called MIDAS, meaning Mi(xed) Da(ta) S(ampling), regressions.\footnote{\cite{ghysels:2013} also developed a package for \proglang{MATLAB} which deals with the estimation and information criteria-based specification of MIDAS regressions as well as forecasting and nowcasting of low frequency series.} 
+\citeasnoun{andreou:rmm} using so called MIDAS, meaning Mi(xed) Da(ta) S(ampling), regressions.\footnote{\cite{ghysels:2013} also developed a package for \proglang{MATLAB} which deals with the estimation and information criteria-based specification of MIDAS regressions as well as forecasting and nowcasting of slow frequency series.} 
 
 In a general framework of regressions with functional constraints on parameters, the \pkg{midasr} package not only provides similar functionality within a standard \proglang{R} framework of the model specification comparable to that available in the usual functions \code{lm} or \code{nls}, but also deals with an extended model specification analysis for MIDAS regressions.
 
@@ -350,6 +350,8 @@ E\left(\alpha(B)y_t|\yy_{t,1},\{\xx_{t,0}^{(i)}\}_{j=0}^{k}\right)
 \bigg|_{\lambda_{r}^{(i)}=\lambda^{(i)}}&=\sum_{i=0}^h\lambda^{(i)}\sum_{r=0}^p \sum_{s=1}^{m_i}w(\dede_{i};s)x_{(t-1-r)m_i+s}^{(i)},\\
 \end{aligned}
 \end{equation}
+where $\yy_{t,1}=(y_{t-1},...,y_{t-p})'$. 
+
 As can be seen---and leaving aside other less intuitive restrictions---depending on the choice of a particular MIDAS specification with aggregates, it can impose restrictions on the equality of
 \begin{itemize}
 \item the applied weighting scheme/function across variables and/or frequencies ($\forall \ i,\ \ w_{r}^{(i)}(\cdot)=w_{r}(\cdot)$);
@@ -403,7 +405,12 @@ Let us write model \eqref{eq1} for period $t+1$ as
 \begin{equation}\label{eq8a}
 y_{t+1}=\alal^\prime\yy_{t,0}+\bebe(L)^\prime\xx_{t+1,0}+\e_{t+1},
 \end{equation}
-where $\yy_{t,0}=(y_{t-1},\dots,y_{t-p})'$ and $\alal=(\alpha_{1},\alpha_{2},\dots,\alpha_{p})^\prime$ is a vector of parameters of the autoregressive terms. This representation is well suited for (one step ahead) conditional forecasting of $y_{t+1},$ provided that the information on the explanatory variables is available. If it were absent, forecasts of $\xx_{t+1,0}$ would be also necessary from a joint process of $\{y_t,\xx_{t,0}\}$ which might be difficult to specify and estimate correctly, especially, bearing in mind the presence of data with mixed frequencies. Instead, a direct approach to forecasting is often applied in the MIDAS framework. Namely, given an information set available up to a moment $t$ defined by $\mathcal{I}_{t,0}=\{\yy_{t,j},\xx_{t,j}\}_{j=0}^{\infty},$ an $\ell$-step ahead direct forecast
+where $\yy_{t,0}=(y_{t},\dots,y_{t-p+1})'$ and $\alal=(\alpha_{1},\alpha_{2},\dots,\alpha_{p})^\prime$ is a vector of parameters of the autoregressive terms. This representation is well suited for (one step ahead) conditional forecasting of $y_{t+1},$ provided that the information on the explanatory variables is available. If it were absent, forecasts of $\xx_{t+1,0}$ would be also necessary from a joint process of $\{y_t,\xx_{t,0}\}$ which might be difficult to specify and estimate correctly, especially, bearing in mind the presence of data with mixed frequencies. Instead, a direct approach to forecasting is often applied in the MIDAS framework. Namely, given an information set available up to a moment $t$ defined by $\mathcal{I}_{t,0}=\{\yy_{t,j},\xx_{t,j}\}_{j=0}^{\infty},$ where 
+\begin{align*}
+ \yy_{t,j}&=(y_{t-j},...,y_{t-j-p+1})'\\
+ \xx_{t,j}&=(x^{(0)}_{tm_0},...,x^{(i)}_{tm_i},...,x^{(h)}_{tm_h})',
+\end{align*}
+an $\ell$-step ahead direct forecast
 \begin{equation}\label{eq8}
 \tilde y_{t+\ell}=E\left(y_{t+\ell}\big|\mathcal{I}_{t,0}\right)=\alal_\ell^\prime\yy_{t,0}+\bebe_\ell(L)^\prime\xx_{t,0},\ \ell\in\mathbb{N},
 \end{equation}
@@ -549,7 +556,7 @@ eq.r2<-midas_r(y~trend+mls(x,0:7,4,nealmon)+mls(z,0:16,12,nealmon),
               start=list(x=c(1,-0.5),z=c(2,0.5,-0.1)),
               Ofunction="optim", method="Nelder-Mead")
 @ 
-If we want to use  Golub-Pereyra algorithm for partially linear least-squares models implemented in function \code{nls} we use the following code
+If we want to use  Golub-Pereyra algorithm for partially linear least-squares models implemented in the  function \code{nls} we use the following code
 <<eval=FALSE,echo=TRUE,cache=FALSE, results="markup",tidy=FALSE>>=
 eq.r2<-midas_r(y~trend+mls(x,0:7,4,nealmon)+mls(z,0:16,12,nealmon),
               start=list(x=c(1,-0.5), z=c(2,0.5,-0.1)),              
@@ -563,20 +570,20 @@ eq.r2<-midas_r(y~trend+mls(x,0:7,4,nealmon)+mls(z,0:16,12,nealmon),
 eq.r2<-midas_r(eq.r2,Ofunction="nls")
 @ 
 
-The output of the optimisation function used can be found by inspecting the element \code{opt} of \code{midas_r} output.
+The output of the optimization function used can be found by inspecting the element \code{opt} of \code{midas_r} output.
 <<eval=TRUE,echo=TRUE,cache=TRUE, results="markup", tidy=FALSE>>=
 eq.r2<-midas_r(y~trend+mls(x,0:7,4,nealmon)+mls(z,0:16,12,nealmon),
               start=list(x=c(1,-0.5),z=c(2,0.5,-0.1)),
               Ofunction="optim", method="Nelder-Mead")
 eq.r2$opt
 @ 
-Here we observe that Nelder-Mead algorithm evaluated the cost function 502 times.
+Here we observe that the Nelder-Mead algorithm evaluated the cost function 502 times.
 
-The optimisation functions in \proglang{R} report the status of the convergence of optimisation algorithm by the numeric constant, 0 indicating succesful convergence. This code is reported as the element \code{convergence} of the \code{midas_r} output.
+The optimization functions in \proglang{R} report the status of the convergence of optimization algorithm by the numeric constant, 0 indicating succesful convergence. This code is reported as the element \code{convergence} of the \code{midas_r} output.
 <<eval=TRUE,echo=TRUE,cache=FALSE, results="markup", tidy=FALSE>>=
 eq.r2$convergence
 @ 
-In this case the convergence was not succesfull. The help page of function \code{optim} indicates that convergence code 1 means that iteration limit was reached.
+In this case the convergence was not successfull. The help page of the function \code{optim} indicates that convergence code 1 means that the iteration limit was reached.
 
 In order to improve the convergence it is possible to use user defined gradient functions. To use them it is necessary to define gradient function of the restriction. For example for the \code{nealmon} restriction the gradient function is defined in the following way:
 <<eval=TRUE,echo=TRUE,cache=TRUE,resuls="markup",tidy=FALSE>>=
@@ -589,13 +596,13 @@ nealmon.gradient <- function(p,d,m) {
     cbind(eplc/s,p[1]*(pl*eplc/s-eplc%*%t(ds)/s^2))
 }
 @ 
-The naming convention \code{restriction_name.gradient} is important, since currently this is the way the \code{midas_r} ``knows'' about the gradient functions. To use this function for the optimisation it is necessary to set \code{user.gradient=TRUE} in call to the \code{midas_r}:
+The naming convention \code{restriction_name.gradient} is important, currently this is the way the \code{midas_r} ``knows'' about the gradient functions. To use this function for the optimization it is necessary to set \code{user.gradient=TRUE} in call to \code{midas_r}:
 <<eval=TRUE,echo=TRUE,cache=TRUE,results="markup",tidy=FALSE>>=
 eq.r2<-midas_r(y~trend+mls(x,0:7,4,nealmon)+mls(z,0:16,12,nealmon),
               start=list(x=c(1,-0.5),z=c(2,0.5,-0.1)),
               user.gradient=TRUE)
 @ 
-This way \code{midas_r} calculates the exact gradient of the NLS problem ~\eqref{eqNLS} using the specified gradient function of the restriction. For all the types of the restrictions referenced in table \ref{tab:3} the gradient functions are specified in the package \pkg{midasr}. 
+This way \code{midas_r} calculates the exact gradient of the NLS problem ~\eqref{eqNLS} using the specified gradient function of the restriction. For all the types of the restrictions referenced in table \ref{tab:3} the gradient functions are specified in the package \pkg{midasr}.
 
 The gradient and the hessian of the NLS problem are supplied as the output of \code{midas_r}. The numerical approximation of the hessian is calculated using the package \pkg{numDeriv}, the exact gradient is calculated if \code{user.gradient=TRUE} and the numerical approximation otherwise. Having the gradient and hessian calculated allows to check whether the necessary and sufficient conditions for the convergence are satisfied. This is performed by the function \code{deriv_test} which calculates the Euclidean norm of the gradient and the eigenvalues of the hessian. It then tests whether the norm of gradient is close to zero and whether the eigenvalues are positive.
 
@@ -609,7 +616,7 @@ deriv_tests(eq.r, tol = 1e-06)
 
 % Furthermore, the starting values can affect the convergence of %estimators (at least, they need to belong to a set of feasible values %as e.g. defined in Table 1).
 
-To retrieve the vector of constrained estimates  $\tilde\theta$ (and, hence, also $\hat\ff=\ff_{\gaga}\big|_{{\gaga}=\widehat{\gaga}}$) that corresponds to the vector ${\thth}$ ({\bebe}, respectively), the function \code{midas_coef} can be used as follows
+To retrieve a vector of constrained estimates  $\tilde\theta$ (and, hence, also $\hat\ff=\ff_{\gaga}\big|_{{\gaga}=\widehat{\gaga}}$) which.min corresponds to the vector ${\thth}$ ({\bebe}, respectively), the function \code{midas_coef} can be used as follows
 <<echo=TRUE,cache=TRUE, results="markup">>=
 midas_coef(eq.r)
 @ 
@@ -771,7 +778,7 @@ Conditional forecasting (with confidence intervals, etc.) using unrestricted U-M
 The function \code{predict} works similarly to \code{predict.lm}. It takes the new data, transforms it into an appropriate matrix and multiplies it with the coefficients. Suppose we want to produce the forecast $\hat{y}_{T+1|T}$  for the model \eqref{eq9}. To produce this forecast we need the data $x_{4(T+1)},...,x_{4T-3}
 $ and $z_{12(T+1)},...,z_{12T-4}.$ It would be tedious to calculate precisely the required data each time we want to perform a forecasting exercise. To alleviate this problem the package \pkg{midasr} provides the function \code{forecast}. This function assumes that the model was estimated with the data up to low frequency index $T.$ It is then assumed that the new data is the data after the low frequency $T$ and then calculates the appropriate forecast. For example suppose that we have new data for one low frequency period for the model \eqref{eq9}. Here is how the forecast for one period would look like:
 
-<<echo=TRUE,cache=FALSE,results="markup">>=
+<<echo=TRUE,cache=TRUE,results="markup">>=
 newx<-rnorm(4)
 newz<-rnorm(12)
 forecast(eq.rb,newdata=list(x=newx,z=newz,trend=251))
@@ -841,7 +848,7 @@ The above example illustrated a general usage of the function \code{select_and_f
 \item \code{mls(z,12:20,12,nealmon)} with hyper-parameters \code{z=c(-1,2,-0.1)} i.e.\ with one hyper-parameter less in the weighting function.
 \end{itemize}
 Given already preselected and evaluated models, user can use the function \code{average_forecast} to evaluate the forecasting performance. To use this function at first it is necessary to fit the model and then pass it to function \code{average_forecast} specifying the in-sample and out-of-sample data, accuracy measures and weighting scheme in a similar manner to \code{select_and_forecast}
-<<eval=TRUE,echo=TRUE,cache=TRUE,results="markup",tidy=FALSE>>=
+<<eval=FALSE,echo=TRUE,cache=TRUE,results="markup",tidy=FALSE,label=avgf>>=
 mod1 <- midas_r(y ~ trend + mls(x, 4:14, 4, nealmon) + mls(z, 12:22, 12, nealmon),
                 start=list(x=c(10,1,-0.1),z=c(2,-0.1)))
 avgf <- average_forecast(list(mod1),
@@ -887,14 +894,14 @@ The last two lines are needed to equalize the sample sizes, which are different 
 plot.ts(nx,xlab="Time",ylab="Percentages",col=4,ylim=c(-5,6))
 lines(ny,col=2)
 @ 
-\caption{Quatertly GDP and Monthly Non-Farm Payroll Employment Growth Rate}
+\caption{Quaterly GDP and Monthly Non-Farm Payroll Employment Growth Rate}
 \end{figure}
 To specify the model for the \code{midas_r} function we rewrite it in the following equivalent form:
 \begin{align*}
 y_t = \alpha+\rho y_{t-1}+\sum_{j=3}^{11}\theta_jx_{3t-j}+\varepsilon_t,
 \end{align*}
 As in \cite{ghysels:2013} we restrict the estimation sample from the first quarter of 1985 to the first quarter of 2009.  We  evaluate the models with the Beta polynomial, Beta with non-zero and U-MIDAS weight specifications.
-<<echo=TRUE,cache=TRUE,results="markup">>=
+<<echo=TRUE,cache=TRUE,results="markup",label="gdp_define">>=
 xx <- window(nx,start=c(1985,1),end=c(2009,3))
 yy <- window(ny,start=c(1985,1),end=c(2009,1))
 
@@ -913,7 +920,7 @@ coef(um)
 @ 
 We can evaluate the forecasting performance of these three models on the out of sample data, containing 9 quarters, from 2009Q2 to 2011Q2
 
-<<echo=TRUE,cache=TRUE,results="markup",tidy=FALSE>>=
+<<echo=TRUE,cache=TRUE,results="markup",tidy=FALSE,label="gdp_avgf">>=
 fulldata <- list(xx=window(nx,start=c(1985,1),end=c(2011,6)),
                    yy=window(ny,start=c(1985,1),end=c(2011,2)))
 insample <- 1:length(yy)
@@ -968,7 +975,7 @@ For empirical demonstration we use the realized variance data on stock
 indices provided by the Oxford-Man Institute of Quantitative Finance.
 
 We estimate the model for the annualized realized volatility of the S\&P500 index, which is based on 5-minute returns data.
-<<echo=TRUE,cache=TRUE>>=
+<<echo=TRUE,cache=FALSE,label="rv_define">>=
 load("data/spx2.RData")
 spx2.rvol <- na.omit(100*sqrt(252*SPX2))
 mh <- midas_r(rv~mls(rv,1:20,1,harstep),data=list(rv=spx2.rvol),start=list(rv=c(1,1,1)))
@@ -976,7 +983,7 @@ summary(mh)
 @ 
 For comparison we also estimate the model with the normalized exponential Almon weights
 
-<<echo=TRUE,cache=TRUE>>=
+<<echo=TRUE,cache=FALSE>>=
 mr <- midas_r(rv~mls(rv,1:20,1,nealmon),data=list(rv=spx2.rvol),start=list(rv=c(0,0,0)),user.gradient=TRUE)
 summary(mr)
 @ 
@@ -1019,20 +1026,20 @@ lines(0:19,weight_coef(mr),col=3)
 \end{figure}
 
 For the exponential Almon lag specification we can choose the number
-of lags via AIC or BIC.
+of lags via AIC or BIC. 
 
-<<echo=TRUE,cache=TRUE,results="markup",tidy=FALSE>>=
-tb <- expand_weights_lags("nealmon",from=1,to=c(5,40),
+<<echo=TRUE,cache=TRUE,results="markup",tidy=FALSE,label="rv_select">>=
+tb <- expand_weights_lags("nealmon",from=1,to=c(5,15),
                           start=list(nealmon=c(0,0,0)))
 mtb <- midas_r_ic_table(rv~mls(rv,1:20,1,nealmon),
                         data=list(rv=spx2.rvol),table=list(rv=tb),
-                        test="hAhr.test",
+                        test="hAh.test",
                         user.gradient=TRUE,showprogress=FALSE)
 mtb$candlist <- lapply(mtb$candlist,midas_r,Ofunction="nls")
+mtb$test <- "hAhr.test"
 mtb <- midas_r_ic_table(mtb)
 @
-Here we used two optimization methods to improve the convergence.
-The AIC selects the model with 9 lags:
+Here we used two optimization methods to improve the convergence. The function \code{midas_r_ic_table} applies the \code{test} function for each  candidate model. The function \code{hAhr.test} takes a lot of computing time, especialy for models with larger number of lags, so we calculate it only for the second final step, and we restrict the number of lags choose from.  The AIC selects the model with 9 lags:
 
 <<echo=TRUE,cache=TRUE>>=
 bm <- modsel(mtb)
@@ -1048,7 +1055,7 @@ We can look into the forecast performance of both models, using a
 rolling forecast with 1000 observation window. For comparison we also
 calculate the forecasts of an unrestricted AR(20) model.
 
-<<echo=TRUE,cache=TRUE,results="markup",tidy=FALSE>>=
+<<echo=TRUE,cache=FALSE,results="markup",tidy=FALSE,label="rv_avgf">>=
 ar20 <- midas_r(rv~mls(rv,1:20,1),data=list(rv=spx2.rvol),start=NULL)
 forc <- average_forecast(list(ar20,mh,bm),
                              data=list(rv=spx2.rvol),
