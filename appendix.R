@@ -46,3 +46,4 @@ res <- lapply(nn,repr,R=1000)
 norms <- data.frame(nn,t(sapply(lapply(res,"[[","norms"),function(l)apply(l,2,mean))))
 mses <- data.frame(nn,t(sapply(lapply(res,"[[","mse"),function(l)apply(l,2,mean))))
 
+save(norms,mses,file="data/mseb.RData")

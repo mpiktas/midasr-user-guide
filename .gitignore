@@ -7,12 +7,17 @@
 #Tangled code
 midasr-user-guide.R
 
+*.sty
+*.cls
+*guide-*
+
 #Sweave unnecessary files
 *.aux
 *.log
 *.out
 *.tex
-
+*.bbl
+*.blg
 #Emacs and knitr files
 *.#
 *.Rt

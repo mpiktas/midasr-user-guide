@@ -19,6 +19,7 @@
 \newcommand{\xx}{\mbox{\boldmath$x$}}
 \newcommand{\XX}{\mbox{\boldmath$X$}}
 \newcommand{\yy}{\mbox{\boldmath$y$}}
+\newcommand{\eps}{\varepsilon}
 \newcommand{\specialcell}[2][c]{%
   \begin{tabular}[#1]{@{}c@{}}#2\end{tabular}}
 
@@ -113,7 +114,7 @@ opts_chunk$set(tidy=TRUE,tidy.opts=list(keep.blank.line=FALSE, width.cutoff=60))
 suppressMessages(library(tseries))
 suppressMessages(library(quantmod))   
 options("getSymbols.warning4.0"=FALSE)
-load("mseb.RData")
+load("data/mseb.RData")
 library(ggplot2)
 library(reshape2)
 msd <- melt(mses[-1,],id=1)
@@ -493,10 +494,10 @@ which yield the shapes of impact as plotted in Figure \ref{fig:fig2}.
 
 \begin{figure}[t]
 <<echo=FALSE,fig.show="hold",fig.height=3.5>>=
-plot(x=0:16,nealmon(p=c(2,0.5,-0.1),d=17),type="l",xlab="High frequency lag",ylab="Weights",lty=2)
-lines(x=0:7,nealmon(p=c(1,-0.5),d=8))
+plot(x=0:16,nealmon(p=c(2,0.5,-0.1),d=17),type="l",xlab="High frequency lag",ylab="Weights",col=4)
+lines(x=0:7,nealmon(p=c(1,-0.5),d=8),col=2)
 @ 
-\caption{Shapes of impact}
+\caption{Shapes of impact, blue for $x_\tau$, red for $z_\tau$.}
 \label{fig:fig2}
 \end{figure}
 
@@ -893,7 +894,7 @@ To specify the model for the \code{midas_r} function we rewrite it in the follow
 y_t = \alpha+\rho y_{t-1}+\sum_{j=3}^{11}\theta_jx_{3t-j}+\varepsilon_t,
 \end{align*}
 As in \cite{ghysels:2013} we restrict the estimation sample from the first quarter of 1985 to the first quarter of 2009.  We  evaluate the models with the Beta polynomial, Beta with non-zero and U-MIDAS weight specifications.
-<<echo=TRUE,cache=FALSE,results="markup">>=
+<<echo=TRUE,cache=TRUE,results="markup">>=
 xx <- window(nx,start=c(1985,1),end=c(2009,3))
 yy <- window(ny,start=c(1985,1),end=c(2009,1))
 
@@ -912,7 +913,7 @@ coef(um)
 @ 
 We can evaluate the forecasting performance of these three models on the out of sample data, containing 9 quarters, from 2009Q2 to 2011Q2
 
-<<echo=TRUE,cache=FALSE,results="markup",tidy=FALSE>>=
+<<echo=TRUE,cache=TRUE,results="markup",tidy=FALSE>>=
 fulldata <- list(xx=window(nx,start=c(1985,1),end=c(2011,6)),
                    yy=window(ny,start=c(1985,1),end=c(2011,2)))
 insample <- 1:length(yy)
@@ -1047,7 +1048,7 @@ We can look into the forecast performance of both models, using a
 rolling forecast with 1000 observation window. For comparison we also
 calculate the forecasts of an unrestricted AR(20) model.
 
-<<echo=TRUE,cache=FALSE,results="markup",tidy=FALSE>>=
+<<echo=TRUE,cache=TRUE,results="markup",tidy=FALSE>>=
 ar20 <- midas_r(rv~mls(rv,1:20,1),data=list(rv=spx2.rvol),start=NULL)
 forc <- average_forecast(list(ar20,mh,bm),
                              data=list(rv=spx2.rvol),
