@@ -972,7 +972,7 @@ harstep <- function(p,d,m) {
 @ 
 
 For empirical demonstration we use the realized variance data on stock
-indices provided by the Oxford-Man Institute of Quantitative Finance.
+indices provided by \cite{oxmandata}.
 
 We estimate the model for the annualized realized volatility of the S\&P500 index, which is based on 5-minute returns data.
 <<echo=TRUE,cache=FALSE,label="rv_define">>=
