@@ -40,7 +40,23 @@ Regression models involving data sampled at different frequencies are of general
 }
 \Keywords{MIDAS, specification test}
 \Plainkeywords{MIDAS, specification test}
-\Address{Vaidotas Zemlys\\
+\Address{
+Eric Ghysels\\
+Department of Economics\\
+University of North Carolina - Chapel Hill\\
+Gardner Hall, CB 3305 Chapel Hill, NC 27599-3305\\
+E-mail: \email{eghysels@unc.edu}\\
+URL: \url{http://www.unc.edu/~eghysels/}\\  
+\\
+Virmantas Kvedaras\\
+Department of Econometric Analysis\\
+Faculty of Mathematics and Informatics\\
+Vilnius University\\
+Naugarduko g. 24, Vilnius, Lithuania\\
+E-mail: \email{virmantas.kvedaras@mif.vu.lt}\\
+URL:\url{http://mif.vu.lt/ututi/teacher/vk}\\
+\\
+Vaidotas Zemlys\\
 Department of Econometric Analysis\\
 Faculty of Mathematics and Informatics\\
 Vilnius University\\
