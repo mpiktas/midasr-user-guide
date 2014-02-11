@@ -1,4 +1,4 @@
-\documentclass[nojss]{jss}
+\documentclass{jss}
 \usepackage{amsmath,amssymb}
 \usepackage{bm}
 \usepackage{multirow}
