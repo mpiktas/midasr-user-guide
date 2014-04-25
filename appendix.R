@@ -46,4 +46,17 @@ res <- lapply(nn,repr,R=1000)
 norms <- data.frame(nn,t(sapply(lapply(res,"[[","norms"),function(l)apply(l,2,mean))))
 mses <- data.frame(nn,t(sapply(lapply(res,"[[","mse"),function(l)apply(l,2,mean))))
 
-save(norms,mses,file="data/mseb.RData")
+
+msd <- melt(mses[-1,],id=1)
+colnames(msd)[2] <- "Constraint"
+nmd <- melt(norms[-1,],id=1)
+colnames(nmd)[2] <- "Constraint"
+
+msd$Type <- "Mean squared error"
+nmd$Type <- "Distance from true values"
+oos_prec <- rbind(msd,nmd)
+oos_prec$Type <- factor(oos_prec$Type,levels=c("Mean squared error","Distance from true values"))
+
+
+
+

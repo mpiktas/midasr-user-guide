@@ -130,24 +130,11 @@ the parameters of an underlying data generating process did follow a certain fun
 <<echo=FALSE,fig.show="hold",fig.height=3.5>>=
 opts_chunk$set(tidy=TRUE,tidy.opts=list(keep.blank.line=FALSE, width.cutoff=60))
 suppressMessages(library(tseries))
-suppressMessages(library(quantmod))   
-options("getSymbols.warning4.0"=FALSE)
-load("data/mseb.RData")
-library(ggplot2)
-library(reshape2)
-msd <- melt(mses[-1,],id=1)
-colnames(msd)[2] <- "Constraint"
-nmd <- melt(norms[-1,],id=1)
-colnames(nmd)[2] <- "Constraint"
-#qplot(x=n,y=value,data=msd,geom="line",colour=Constraint,main="Mean squared error",ylab="")+xlab("Sample size")#+theme(legend.position="none")
-#qplot(x=n,y=value,data=nmd,geom="line",colour=Constraint,main="Distance from true values")+xlab("Sample size")
-msd$Type <- "Mean squared error"
-nmd$Type <- "Distance from true values"
-dtd <- rbind(msd,nmd)
-dtd$Type <- factor(dtd$Type,levels=c("Mean squared error","Distance from true values"))
-qplot(x=n,y=value,data=dtd,geom="line",colour=Constraint,ylab="")+facet_wrap(~Type,scales="free_y")+xlab("Sample size")
- 
-@ 
+suppressMessages(library(midasr))
+data(oos_prec)
+qplot(x=n,y=value,data=oos_prec,geom="line",colour=Constraint,ylab="")+facet_wrap(~Type,scales="free_y")+xlab("Sample size")
+@
+
 \caption{Mean squared error and distance to true coefficient values}
 \end{figure}
 
@@ -891,15 +878,13 @@ where $y_t$ is the log difference of quarterly seasonally adjusted real US GDP a
 
 First we load the data and perform necessary transformations.
 <<echo=TRUE,cache=TRUE,results="markup">>=
-library(quantmod)    
-gdp <- getSymbols("GDP",src="FRED",auto.assign=FALSE)
-payems <- getSymbols("PAYEMS",src="FRED",auto.assign=FALSE)
+data(USqgdp)
+data(USpayems)
+y <- window(USqgdp,end=c(2011,2))
+x <- window(USpayems,end=c(2011,7))
 
-y <- window(ts(gdp,start=c(1947,1),frequency=4),end=c(2011,2))
-x <- window(ts(payems,start=c(1939,1),frequency=12),end=c(2011,7))
-
-yg <- log(y/lag(y,-1))*100
-xg <- log(x/lag(x,-1))*100
+yg <- diff(log(y))*100
+xg <- diff(log(x))*100
 
 nx <- ts(c(NA,xg,NA,NA),start=start(x),frequency=12)
 ny <- ts(c(rep(NA,33),yg,NA),start=start(x),frequency=4)
@@ -994,8 +979,8 @@ indices provided by \cite{oxmandata}.
 
 We estimate the model for the annualized realized volatility of the S\&P500 index, which is based on 5-minute returns data.
 <<echo=TRUE,cache=FALSE,label="rv_define">>=
-load("data/spx2.RData")
-spx2.rvol <- na.omit(100*sqrt(252*SPX2))
+data(rvsp500)
+spx2.rvol <- 100*sqrt(252*as.numeric(rvsp500[,"SPX2.rv"]))
 mh <- midas_r(rv~mls(rv,1:20,1,harstep),data=list(rv=spx2.rvol),start=list(rv=c(1,1,1)))
 summary(mh)
 @ 
@@ -1104,7 +1089,7 @@ nealmon(p=c(2,0.5,-0.1),d=17)
 @
 The data for this DGP was generated for low frequency sample sizes 50, 100, 200, 300, 500, 750 and 1000. For each sample size an  additional out-of-sample data set was generated using a quarter of the size of an in-sample data set. Three MIDAS regression models were estimated using in-sample data set: an unrestricted MIDAS, a restricted one using the correct constraint from the DGP, and the one with an incorrect restriction (non-exponential Almon polynomial). The forecast was calculated using the out-of-sample data-set. The Euclidean distance between the model coefficients and the coefficients of the DGP was recorded together with the mean squared error of the forecast.
 
-This process was repeated 1000 times. The points in the figure are the averages of the replications. The full code can be found on the website of package \pkg{midasr}.
+This process was repeated 1000 times. The points in the figure are the averages of the replications. The code for generating the data can be found in the help page of a dataset \code{oos_prec} in the package \pkg{midasr}.
 
 \bibliography{guideR}
 
