@@ -31,7 +31,7 @@
 
 \title{Mixed Frequency Data Sampling Regression Models: the \proglang{R}
     Package \pkg{midasr}}
-\Plaintitle{Mixed Frequency Data Sampling Regression Models: the R Package midasr}
+\Plaintitle{Mixed Frequency Data Sampling Regression Models: The R Package midasr}
 \Shorttitle{R package \pkg{midasr}}
 
 \Abstract{
@@ -125,17 +125,21 @@ easily become infeasible, whenever either larger differences in frequencies or m
 This approach greatly reduces the number of parameters to be estimated, from $d$ to $q=\sum_{i=0}^{h_i}q_i,$ which is assumed to be always considerably less than the number of observations available at the lowest frequency. This gain is offset by the fact that \eqref{l:eqintro} becomes non-linear model, however if
 the parameters of an underlying data generating process did follow a certain functional constraint which is perfectly or well approximated by a constraint function chosen by a researcher, then significant efficiency gains could be achieved from the imposed constraints. Figure \ref{fig:fig1} plots the out-of-sample prediction precision (left figure) and the parameter estimation precision (right figure) in an unconstrained and constrained simple model with correct and approximate restrictions (see Appendix A for details).
 
-\begin{figure}[htbp]
-  \label{fig:fig1}
-<<echo=FALSE,fig.show="hold",fig.height=3.5>>=
-opts_chunk$set(tidy=TRUE,tidy.opts=list(keep.blank.line=FALSE, width.cutoff=60))
-suppressMessages(library(tseries))
-suppressMessages(library(midasr))
-data(oos_prec)
-qplot(x=n,y=value,data=oos_prec,geom="line",colour=Constraint,ylab="")+facet_wrap(~Type,scales="free_y")+xlab("Sample size")
+<<setup, include=FALSE, cache=FALSE>>=
+render_sweave()
 @
 
-\caption{Mean squared error and distance to true coefficient values}
+\begin{figure}[htbp]
+ <<echo=FALSE,fig.show="hold",fig.height=3.5>>=
+opts_chunk$set(tidy=TRUE,tidy.opts=list(keep.blank.line=FALSE, width.cutoff=60),highlight=FALSE,prompt=TRUE,comment=NA,background="#FFFFFF")
+options(prompt="R> ")
+suppressMessages(library("tseries"))
+suppressMessages(library("midasr"))
+data("oos_prec")
+qplot(x=n,y=value,data=oos_prec,geom="line",colour=Constraint,ylab="")+facet_wrap(~Type,scales="free_y")+xlab("Sample size")
+@
+\caption{Mean squared error and distance to true coefficient values.}
+ \label{fig:fig1}
 \end{figure}
 
 
@@ -431,7 +435,7 @@ Given periods $\ell=1,2,\dots,$ and a selected model or a list of specifications
 \section{Implementation in {midasr} package}\label{Implementation}
 \subsection{Data handling}
 
-From a data handling point of view, the key specificity of the MIDAS regression model is that the length of observations of variables observed at various frequencies differs and needs to be aligned as described in section \ref{Theory}. There is no existing \proglang
+From a data handling point of view, the key specificity of the MIDAS regression model is that the length of observations of variables observed at various frequencies differs and needs to be aligned as described in Section \ref{Theory}. There is no existing \proglang
 {R} function which performs such a transformation and the package \pkg
 {midasr} provides a solution to these challenges. The basic functionality of data handling is summarized in Table \ref{tab:2}.
 %\begin{sidewaystable}[p]
@@ -456,16 +460,14 @@ From a data handling point of view, the key specificity of the MIDAS regression 
 \hline\hline
 \end{tabular}
 }
-\caption{\label{tab:2}\small A summary of basic data handling functionality  in package \emph{midasr}.}
+\caption{\small A summary of a basic data handling functionality in the package \emph{midasr}.}
+\label{tab:2}
 \end{center}
 \end{table}
 %\end{sidewaystable}
 
 Function \code{fmls(x,k,m)} performs exactly the transformation defined in equation \eqref{eq2}, converting an observation vector $x$ of a given (potentially) higher-frequency series into the corresponding stacked matrix of observations of ($k+1$) low-frequency series (contemporaneous with $k$ lags) as defined by the maximum lag order $k$ and the frequency ratio $m.$ For instance, given a series of twelve observations
 
-<<echo=FALSE>>=
-suppressMessages(library(midasr))
-@ 
 <<echo=TRUE, cache=TRUE, results="markup">>=
 x<-1:12
 @ 
@@ -516,16 +518,12 @@ lines(x=0:7,nealmon(p=c(1,-0.5),d=8),col=2)
 The following \proglang{R} code produces a series according to the DGP characterized above:
 <<echo=TRUE,cache=TRUE, results="markup">>=
 set.seed(1001)
-## Number of low-frequency observations
 n<-250
-## Linear trend and higher-frequency explanatory variables (e.g. quarterly and monthly)
 trend<-c(1:n)
 x<-rnorm(4*n)
 z<-rnorm(12*n)
-## Exponential Almon polynomial constraint-consistent coefficients
 fn.x <- nealmon(p=c(1,-0.5),d=8)
 fn.z <- nealmon(p=c(2,0.5,-0.1),d=17)
-## Simulated low-frequency series (e.g. yearly)
 y<-2+0.1*trend+mls(x,0:7,4)%*%fn.x+mls(z,0:16,12)%*%fn.z+rnorm(n)
 @ 
 It is of interest to note that the impact of variable $x$ can be represented using aggregates-based MIDAS, whereas the impact of $z$ cannot.
@@ -615,12 +613,7 @@ The gradient and the hessian of the NLS problem are supplied as the output of \c
 <<echo=TRUE,cache=TRUE, results="markup">>=
 deriv_tests(eq.r, tol = 1e-06)
 @ 
-%reports, for a chosen level of tolerance, whether the necessary and %sufficient conditions for the convergence are satisfied. 
-
-%% [??Pirma salyga neitiketinai daznai FALSE net tokiam lygiui kaip 0.1, nors iverciai tikrai 'arti' tikruju,-kas darosi??]
-
-% Furthermore, the starting values can affect the convergence of %estimators (at least, they need to belong to a set of feasible values %as e.g. defined in Table 1).
-
+s
 To retrieve a vector of constrained estimates  $\tilde\theta$ (and, hence, also $\hat\ff=\ff_{\gaga}\big|_{{\gaga}=\widehat{\gaga}}$) which.min corresponds to the vector ${\thth}$ ({\bebe}, respectively), the function \code{midas_coef} can be used as follows
 <<echo=TRUE,cache=TRUE, results="markup">>=
 midas_coef(eq.r)
@@ -639,11 +632,11 @@ twice ($d/m=2$), as implied by the number of periods at higher-frequency (\code{
 <<echo=TRUE,cache=TRUE, results="hide">>=
 eq.r2<-midas_r(y~trend+mls(x,0:7,4,amweights,nealmon,"C")+mls(z,0:16,12,nealmon),start=list(x=c(1,-0.5),z=c(2,0.5,-0.1)))
 @ 
-where the first variable follows and aggregates-based MIDAS restriction scheme. Note that the selection of alternative types "A" and "B" are connected with specifications having a larger number of parameters (see Table 3), hence the list of starting values needs to be adjusted to account for an increase in the number of (potentially unequal) impact parameters. %To simplify the usage, the starting values of a single period are used for all the lags. %[?? O kodel tas pats nepadaryta ir su poveikio parametrais? Manau, reikia naudoti vienodus ir cia??]
+where the first variable follows and aggregates-based MIDAS restriction scheme. Note that the selection of alternative types "A" and "B" are connected with specifications having a larger number of parameters (see Table \ref{tab:3}), hence the list of starting values needs to be adjusted to account for an increase in the number of (potentially unequal) impact parameters. %To simplify the usage, the starting values of a single period are used for all the lags. %[?? O kodel tas pats nepadaryta ir su poveikio parametrais? Manau, reikia naudoti vienodus ir cia??]
 
 It should be also noted that, whenever the aggregates-connected restrictions are used, the number of periods must be a multiple of the frequency ratio. For instance, the current lag specification for variable $z$ is not consistent with this requirement and cannot be represented through the (periodic) aggregates, but either  \code{mls(z,0:11,12,amweights,nealmon,"C")} or \code{mls(z,0:23,12,amweights,nealmon,"C")} would be valid expressions from the code implementation point of view.
 
-Table 3 summarizes and provides various other examples of correspondence between \code{midas_r} coding and the analytical specifications of MIDAS regressions.
+Table \ref{tab:3} summarizes and provides various other examples of correspondence between \code{midas_r} coding and the analytical specifications of MIDAS regressions.
 \begin{sidewaystable}[p]
 %\begin{table}[htp]
 \begin{center}
@@ -694,7 +687,8 @@ Table 3 summarizes and provides various other examples of correspondence between
 \hline\hline
 \end{tabular}
 }
-\caption{\label{tab:3}\small Some functionality of specification of MIDAS regressions in \emph{midasr} package.}
+\caption{\small Some functionality of the specification of MIDAS regressions in \emph{midasr} package.}
+\label{tab:3}
 \end{center}
 Note: A the function \code{fn} in the last example of the table is defined e.g.\ by \verb|fn<-function(p,d){p[1]*c(1:d)^p[2]}|
 
@@ -878,8 +872,8 @@ where $y_t$ is the log difference of quarterly seasonally adjusted real US GDP a
 
 First we load the data and perform necessary transformations.
 <<echo=TRUE,cache=TRUE,results="markup">>=
-data(USqgdp)
-data(USpayems)
+data("USqgdp")
+data("USpayems")
 y <- window(USqgdp,end=c(2011,2))
 x <- window(USpayems,end=c(2011,7))
 
@@ -892,12 +886,12 @@ ny <- ts(c(rep(NA,33),yg,NA),start=start(x),frequency=4)
 The last two lines are needed to equalize the sample sizes, which are different in the original data. We simply add additional \code{NA} values at the beginning and the end of the data. The graphical representation of the data is shown in Figure \ref{fig:ghysels}.
 
 \begin{figure}[tp]
-  \label{fig:ghysels}
-<<echo=FALSE,fig.show="hold",fig.height=4>>=
+  <<echo=FALSE,fig.show="hold",fig.height=4>>=
 plot.ts(nx,xlab="Time",ylab="Percentages",col=4,ylim=c(-5,6))
 lines(ny,col=2)
 @ 
-\caption{Quaterly GDP and Monthly Non-Farm Payroll Employment Growth Rate}
+\caption{Quaterly gross domestic product and monthly non-farm payroll employment growth rates.}
+\label{fig:ghysels}
 \end{figure}
 To specify the model for the \code{midas_r} function we rewrite it in the following equivalent form:
 \begin{align*}
@@ -979,7 +973,7 @@ indices provided by \cite{oxmandata}.
 
 We estimate the model for the annualized realized volatility of the S\&P500 index, which is based on 5-minute returns data.
 <<echo=TRUE,cache=FALSE,label="rv_define">>=
-data(rvsp500)
+data("rvsp500")
 spx2.rvol <- 100*sqrt(252*as.numeric(rvsp500[,"SPX2.rv"]))
 mh <- midas_r(rv~mls(rv,1:20,1,harstep),data=list(rv=spx2.rvol),start=list(rv=c(1,1,1)))
 summary(mh)
@@ -1002,8 +996,7 @@ Figure \ref{fig:figHAR} illustrates the coefficients of the fitted
 MIDAS regressions and the coefficients of U-MIDAS
 regression with their corresponding 95\% confidence bounds.
 
-\begin{figure}[tbp]
-  \label{fig:figHAR}
+\begin{figure}[tbp]  
 <<echo=FALSE,fig.show="hold",fig.height=3.5,cache=TRUE>>=
   graph <- function(x,pv0hac=NULL,titlestr=TRUE) {
     cfur <- coef(x$unrestricted)
@@ -1025,7 +1018,8 @@ graph(mh,1,titlestr=FALSE)
 lines(0:19,weight_coef(mr),col=3)
 @
 \caption{Comparison of HAR-RV (blue), Nealmon (green) and U-MIDAS
-    (black) models. }
+    (black) models.}
+  \label{fig:figHAR}
 \end{figure}
 
 For the exponential Almon lag specification we can choose the number
@@ -1076,7 +1070,7 @@ Only a part of the available functionality of the discussed functions of the pac
 
 \section{Appendix}
 
-The figure \ref{fig:fig1} was created using Monte-Carlo simulation. The following DGP was used
+The Figure \ref{fig:fig1} was created using Monte-Carlo simulation. The following DGP was used
 \begin{align*}
   y_t&=2+0.1t+\sum_{j=0}^{16}\beta_jz_{12t-j}+u_t,\text{ }
   z_\tau\sim N(0,\sigma^2),\text{ } u_t\sim N(0,\sigma^2),
