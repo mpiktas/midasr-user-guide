@@ -518,9 +518,9 @@ n<-250
 trend<-c(1:n)
 x<-rnorm(4*n)
 z<-rnorm(12*n)
-fn.x <- nealmon(p=c(1,-0.5),d=8)
-fn.z <- nealmon(p=c(2,0.5,-0.1),d=17)
-y<-2+0.1*trend+mls(x,0:7,4)%*%fn.x+mls(z,0:16,12)%*%fn.z+rnorm(n)
+fn_x <- nealmon(p=c(1,-0.5),d=8)
+fn_z <- nealmon(p=c(2,0.5,-0.1),d=17)
+y<-2+0.1*trend+mls(x,0:7,4)%*%fn_x+mls(z,0:16,12)%*%fn_z+rnorm(n)
 @ 
 It is of interest to note that the impact of variable $x$ can be represented using aggregates-based MIDAS, whereas the impact of $z$ cannot.
 
@@ -551,40 +551,40 @@ As you can see the syntax of the function \code{midas_r} is similar to the stand
 
 The main difference with the function \code{nls} is that there is a greater choice of numerical optimization algorithms. The function \code{midas_r} is written in a way that in theory it can use any \proglang{R} optimization function. The choice is controlled via \code{Ofunction} argument. Currently it is possible to use functions \code{optim} and \code{nls} which are present in a standard \proglang{R} installation and function \code{optimx} from the package \pkg{optimx} \cite{optimx}. The additional arguments to the aforementioned functions can be specified directly in the call to \code{midas_r}. So for example if we want to use the optimization algorithm of Nelder and Mead, which is the default option in the function \code{optim} we use the following code
 <<eval=FALSE,echo=TRUE,cache=TRUE, results="markup", tidy=FALSE>>=
-eq.r2 <- midas_r(y ~ trend + mls(x, 0:7, 4, nealmon) + 
+eq_r2 <- midas_r(y ~ trend + mls(x, 0:7, 4, nealmon) + 
                  mls(z, 0:16, 12, nealmon),
                  start = list(x = c(1, -0.5), z = c(2, 0.5, -0.1)),
                  Ofunction = "optim", method = "Nelder-Mead")
 @ 
 If we want to use  Golub-Pereyra algorithm for partially linear least-squares models implemented in the  function \code{nls} we use the following code
 <<eval=FALSE,echo=TRUE,cache=TRUE, results="markup",tidy=FALSE>>=
-eq.r2 <- midas_r(y ~ trend + mls(x, 0:7, 4, nealmon) + 
+eq_r2 <- midas_r(y ~ trend + mls(x, 0:7, 4, nealmon) + 
                  mls(z, 0:16, 12, nealmon),
                  start = list(x = c(1,-0.5), z = c(2, 0.5, -0.1)),              
                  Ofunction = "nls", method = "plinear")
 @ 
 It is possible to re-estimate the NLS problem with the different algorithm using as starting values the final solution of the previous algorithm. For example it is known, that the default algorithm in \code{nls} is sensitive to starting values. So first we can use the standard Nelder-Mead algorithm to find ``more feasible'' starting values and then use the \code{nls} to get the final result:
 <<eval=FALSE,echo=TRUE,cache=TRUE, results="markup",tidy=FALSE>>=
-eq.r2 <- midas_r(y ~ trend + mls(x, 0:7, 4, nealmon) + 
+eq_r2 <- midas_r(y ~ trend + mls(x, 0:7, 4, nealmon) + 
                  mls(z, 0:16, 12, nealmon),
                  start = list(x = c(1, -0.5), z = c(2, 0.5, -0.1)),
                  Ofunction = "optim", method = "Nelder-Mead")
-eq.r2 <- midas_r(eq.r2, Ofunction = "nls")
+eq_r2 <- midas_r(eq_r2, Ofunction = "nls")
 @ 
 
 The output of the optimization function used can be found by inspecting the element \code{opt} of \code{midas_r} output.
 <<eval=TRUE,echo=TRUE,cache=TRUE, results="markup", tidy=FALSE>>=
-eq.r2 <- midas_r(y ~ trend + mls(x, 0:7, 4, nealmon) + 
+eq_r2 <- midas_r(y ~ trend + mls(x, 0:7, 4, nealmon) + 
                  mls(z, 0:16, 12, nealmon),
                  start = list(x = c(1, -0.5), z = c(2, 0.5, -0.1)),
                  Ofunction = "optim", method = "Nelder-Mead")
-eq.r2$opt
+eq_r2$opt
 @ 
 Here we observe that the Nelder-Mead algorithm evaluated the cost function 502 times.
 
 The optimization functions in \proglang{R} report the status of the convergence of optimization algorithm by the numeric constant, 0 indicating succesful convergence. This code is reported as the element \code{convergence} of the \code{midas_r} output.
 <<eval=TRUE,echo=TRUE,cache=TRUE, results="markup", tidy=FALSE>>=
-eq.r2$convergence
+eq_r2$convergence
 @ 
 In this case the convergence was not successfull. The help page of the function \code{optim} indicates that convergence code 1 means that the iteration limit was reached.
 
@@ -601,7 +601,7 @@ nealmon_gradient <- function(p, d, m) {
 @ 
 The gradient functions are passed as named list elements via argument \code{weight_gradients} :
 <<eval=TRUE,echo=TRUE,cache=TRUE,results="markup",tidy=FALSE>>=
-eq.r2 <- midas_r(y ~ trend + mls(x, 0:7, 4, nealmon) + 
+eq_r2 <- midas_r(y ~ trend + mls(x, 0:7, 4, nealmon) + 
                  mls(z, 0:16, 12, nealmon),
                  start = list(x = c(1, -0.5), z = c(2, 0.5, -0.1)),
                  weight_gradients=list(nealmon = nealmon_gradient))
@@ -631,7 +631,7 @@ nealmon(p=c(1,-0.5),d=4)
 @ 
 twice ($d/m=2$), as implied by the number of periods at higher-frequency (\code{d=8}) and the frequency ratio (\code{m=4}). In this way, the function \code{amweights} can be used to define explicitly a new functional constraint relying on the relationship \eqref{eq6}. Alternatively, one can indicate directly within the function \code{midas_r} that the aggregates-based restriction must be used as follows
 <<echo=TRUE,cache=TRUE, results="hide">>=
-eq.r2<-midas_r(y~trend+mls(x,0:7,4,amweights,nealmon,"C")+mls(z,0:16,12,nealmon),start=list(x=c(1,-0.5),z=c(2,0.5,-0.1)))
+eq_r2<-midas_r(y~trend+mls(x,0:7,4,amweights,nealmon,"C")+mls(z,0:16,12,nealmon),start=list(x=c(1,-0.5),z=c(2,0.5,-0.1)))
 @ 
 where the first variable follows and aggregates-based MIDAS restriction scheme. Note that the selection of alternative types "A" and "B" are connected with specifications having a larger number of parameters (see Table \ref{tab:3}), hence the list of starting values needs to be adjusted to account for an increase in the number of (potentially unequal) impact parameters. %To simplify the usage, the starting values of a single period are used for all the lags. %[?? O kodel tas pats nepadaryta ir su poveikio parametrais? Manau, reikia naudoti vienodus ir cia??]
 
@@ -707,11 +707,11 @@ Here the value of a test statistic, the degrees of freedom (the number of bindin
 
 As can be seen, such a specification, which in fact corresponds to the underlying DGP, cannot be rejected at the usual significance levels, whereas e.g., reducing the number of parameters of functional constraint of variable $z$ to only two instead of three is quite strongly rejected using either version of the test:
 <<echo=TRUE,cache=TRUE, results="markup",tidy=FALSE>>=
-eq.rb <- midas_r(y ~ trend + mls(x, 0:7, 4, nealmon) + 
+eq_rb <- midas_r(y ~ trend + mls(x, 0:7, 4, nealmon) + 
                  mls(z, 0:12, 12, nealmon),
                  start = list(x = c(1, -0.5), z = c(2, -0.1)))
-hAh_test(eq.rb)
-hAhr_test(eq.rb)
+hAh_test(eq_rb)
+hAhr_test(eq_rb)
 @ 
 
 %[Perleidus MC empirinis reiksmingumas hAhr prie H0 neatrodo gerai lyginant su ant taip pat ivertinto modelio gautais hAh. Kazkur  sedi problema.] - viskas ok prie dideliu imciu, pvz., n=2000.
@@ -721,11 +721,11 @@ Whenever the empirical adequacy  cannot be reject at some appropriate level of s
 \subsection{Model selection}
 Suppose that we want to investigate which out of several functional constraints---for instance, the normalized ("nealmon") or non-normalized ("almonp") exponential Almon lag polynomials, or with polynomial of order 2 or 3, and so on---are better suited in a MIDAS regression model of $y$ on $x$ and $z$ (possibly different for each variable). Since the best maximum number of lags can differ with a functional constraint and/or variable/frequency, let us first define using the \pkg{midasr} function \code{expand_weights_lags} the sets of potential models corresponding to each explanatory variable  as follows % and the autoregressive terms of $y$ ;
 <<echo=TRUE,cache=TRUE, results="markup",tidy=FALSE>>=
-set.x <- expand_weights_lags(weights = c("nealmon", "almonp"),
+set_x <- expand_weights_lags(weights = c("nealmon", "almonp"),
                              from = 0, to = c(5, 10), m = 1,
                              start = list(nealmon = c(1, -1), 
                                           almonp = c(1, 0, 0)))
-set.z <- expand_weights_lags(c("nealmon", "nealmon"),
+set_z <- expand_weights_lags(c("nealmon", "nealmon"),
                              0, c(10, 20), 1,
                              start = list(nealmon = c(1, -1), 
                                           nealmon = c(1, -1, 0)))
@@ -743,7 +743,7 @@ expand_weights_lags(weights = c("nealmon", "nbeta"),
 Given the sets of potential specifications for each variable as defined above, the estimation of all the models is performed by
 
 <<eval=FALSE,echo=TRUE,cache=TRUE, results="hide">>=
-eqs.ic<-midas_r_ic_table(y~trend+mls(x,0,m=4)+fmls(z,0,m=12),table=list(z=set.z,x=set.x))
+eqs.ic<-midas_r_ic_table(y~trend+mls(x,0,m=4)+fmls(z,0,m=12),table=list(z=set_z,x=set_x))
 @ 
 The function \code{midas_r_ic_table} returns
 a summary table of all models together with the corresponding values of the usual information criteria and the empirical sizes of adequacy testing of functional restrictions of parameters. The result of derivative tests and the convergence status of the optimization function is also returned.
@@ -783,7 +783,7 @@ $ and $z_{12(T+1)},...,z_{12T-4}.$ It would be tedious to calculate precisely th
 <<echo=TRUE,cache=TRUE,results="markup">>=
 newx<-rnorm(4)
 newz<-rnorm(12)
-forecast(eq.rb,newdata=list(x=newx,z=newz,trend=251))
+forecast(eq_rb,newdata=list(x=newx,z=newz,trend=251))
 @ 
 
 It is also common to estimate models which do not require new data for forecasting
@@ -796,9 +796,9 @@ y_{t}&=2+0.1(t-\ell)+\sum_{j=4\ell}^{7+4\ell}\beta_j^{(1)}x_{4t-j}+\sum_{j=12\el
 \end{align*}
 and can be estimated using \code{midas_r}. For such a model we can get forecasts $\hat{y}_{T+\ell|T},...,\hat{y}_{T+1|T}$ using the explanatory variable data up to low frequency index $T.$ To obtain these forecasts using the function \code{forecast} we need to supply \code{NA} values for explanatory variables. An example for $\ell=1$ is as follows:
 <<echo=TRUE,cache=TRUE,results="markup">>=
-eq.f <- midas_r(y~trend+mls(x,4+0:7,4,nealmon)+mls(z,12+0:16,12,nealmon),
+eq_f <- midas_r(y~trend+mls(x,4+0:7,4,nealmon)+mls(z,12+0:16,12,nealmon),
               start=list(x=c(1,-0.5),z=c(2,0.5,-0.1)))
-forecast(eq.f,newdata=list(x=rep(NA,4),z=rep(NA,12),trend=251))
+forecast(eq_f,newdata=list(x=rep(NA,4),z=rep(NA,12),trend=251))
 @ 
 Note that we still need to specify a value for the trend.
 
@@ -976,14 +976,14 @@ indices provided by \cite{oxmandata}.
 We estimate the model for the annualized realized volatility of the S\&P500 index, which is based on 5-minute returns data.
 <<echo=TRUE,cache=FALSE,label="rv_define">>=
 data("rvsp500")
-spx2.rvol <- 100*sqrt(252*as.numeric(rvsp500[,"SPX2.rv"]))
-mh <- midas_r(rv~mls(rv,1:20,1,harstep),data=list(rv=spx2.rvol),start=list(rv=c(1,1,1)))
+spx2_rvol <- 100*sqrt(252*as.numeric(rvsp500[,"SPX2.rv"]))
+mh <- midas_r(rv~mls(rv,1:20,1,harstep),data=list(rv=spx2_rvol),start=list(rv=c(1,1,1)))
 summary(mh)
 @ 
 For comparison we also estimate the model with the normalized exponential Almon weights
 
 <<echo=TRUE,cache=FALSE>>=
-mr <- midas_r(rv~mls(rv,1:20,1,nealmon), data=list(rv=spx2.rvol),start=list(rv=c(0,0,0)), 
+mr <- midas_r(rv~mls(rv,1:20,1,nealmon), data=list(rv=spx2_rvol),start=list(rv=c(0,0,0)), 
               weight_gradients = list())
 summary(mr)
 @ 
@@ -1016,7 +1016,7 @@ of lags via AIC or BIC.
 tb <- expand_weights_lags("nealmon", from = 1, to = c(5, 15),
                           start = list(nealmon = c(0, 0, 0)))
 mtb <- midas_r_ic_table(rv ~ mls(rv, 1:20, 1, nealmon),
-                        data = list(rv = spx2.rvol), table = list(rv = tb),
+                        data = list(rv = spx2_rvol), table = list(rv = tb),
                         test = "hAh_test",
                         weight_gradients = list(), show_progress = FALSE)
 mtb$candlist <- lapply(mtb$candlist, midas_r, Ofunction = "nls")
@@ -1040,10 +1040,10 @@ rolling forecast with 1000 observation window. For comparison we also
 calculate the forecasts of an unrestricted AR(20) model.
 
 <<echo = TRUE, cache = TRUE, results = "markup", tidy = FALSE, label = "rv_avgf">>=
-ar20 <- midas_r(rv ~ mls(rv, 1:20, 1), data = list(rv = spx2.rvol), 
+ar20 <- midas_r(rv ~ mls(rv, 1:20, 1), data = list(rv = spx2_rvol), 
                 start = NULL)
 forc <- average_forecast(list(ar20, mh, bm),
-                             data = list(rv = spx2.rvol),
+                             data = list(rv = spx2_rvol),
                              insample = 1:1000, outsample = 1001:1100,
                              type = "rolling", show_progress = FALSE)
 forc$accuracy$individual
