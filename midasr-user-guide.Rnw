@@ -113,7 +113,7 @@ regression model which can be represented as
 \end{align}
 where we require
 \begin{align*}
-    E(\eps_t|y_{t-1},\dots,y_{t-p},x^{(0)}_{tm_0},\dots,x^{(0)}_{tm_0-l_i},\dots,x^{(h)}_{tm_h},\dots,x^{(h)}_{tm_k-l_k})=0,
+    E(\eps_t|y_{t-1},\dots,y_{t-p},x^{(0)}_{tm_0},\dots,x^{(0)}_{tm_0-l_i},\dots,x^{(k)}_{tm_k},\dots,x^{(k)}_{tm_k-l_k})=0,
 \end{align*} so that the equation \eqref{l:eqintro} is identified as a projection equation.
 
 The model stated in the equation \eqref{l:eqintro} can be estimated in the usual time series regression fashion or using a Bayesian approach. However, the number of parameters in this model $d$ = $p+\sum_{i=0}^kl_i$ can be very large in terms of the number $n$ of available observations of $y_t$\footnote{In the MIDAS literature it is common to have $k_i\ge m_i$ and $m_i$ can be large, for example monthly versus daily data}. Since the estimation of the model can
@@ -569,7 +569,7 @@ eq_r2 <- midas_r(y ~ trend + mls(x, 0:7, 4, nealmon) +
                  mls(z, 0:16, 12, nealmon),
                  start = list(x = c(1, -0.5), z = c(2, 0.5, -0.1)),
                  Ofunction = "optim", method = "Nelder-Mead")
-eq_r2 <- midas_r(eq_r2, Ofunction = "nls")
+eq_r2 <- update(eq_r2, Ofunction = "nls")
 @ 
 
 The output of the optimization function used can be found by inspecting the element \code{opt} of \code{midas_r} output.
@@ -614,7 +614,7 @@ The gradient and the hessian of the NLS problem are supplied as the output of \c
 <<echo=TRUE,cache=TRUE, results="markup">>=
 deriv_tests(eq.r, tol = 1e-06)
 @ 
-s
+
 To retrieve a vector of constrained estimates  $\tilde\theta$ (and, hence, also $\hat\ff=\ff_{\gaga}\big|_{{\gaga}=\widehat{\gaga}}$) which.min corresponds to the vector ${\thth}$ ({\bebe}, respectively), the function \code{coef} can be used as follows
 <<echo=TRUE,cache=TRUE, results="markup">>=
 coef(eq.r, midas = TRUE)
@@ -743,7 +743,7 @@ expand_weights_lags(weights = c("nealmon", "nbeta"),
 Given the sets of potential specifications for each variable as defined above, the estimation of all the models is performed by
 
 <<eval=FALSE,echo=TRUE,cache=TRUE, results="hide">>=
-eqs.ic<-midas_r_ic_table(y~trend+mls(x,0,m=4)+fmls(z,0,m=12),table=list(z=set_z,x=set_x))
+eqs_ic<-midas_r_ic_table(y~trend+mls(x,0,m=4)+fmls(z,0,m=12),table=list(z=set_z,x=set_x))
 @ 
 The function \code{midas_r_ic_table} returns
 a summary table of all models together with the corresponding values of the usual information criteria and the empirical sizes of adequacy testing of functional restrictions of parameters. The result of derivative tests and the convergence status of the optimization function is also returned.
@@ -751,18 +751,18 @@ a summary table of all models together with the corresponding values of the usua
 The summary table is a \code{data.frame} where each row corresponds to candidate model, so this table can be manipulated in the usual \proglang{R} way. The table can be accessed as \code{table} element of the list returned by \code{midas_r_ic_table}.  The list of fitted \code{midas_r} objects of all candidate models can be accessed as \code{candlist} element. It is possible to inspect each candidate model and fine-tune its convergence if necessary.
 
 <<eval=FALSE,echo=TRUE,cache=TRUE,results="hide">>=
-eqs.ic$candlist[[5]] <- midas_r(eqs.ic$candlist[[5]],Ofunction="nls")
+eqs_ic$candlist[[5]] <- update(eqs_ic$candlist[[5]],Ofunction="nls")
 @ 
 
-The summary table can be recalculated by simply passing the fine-tuned list in to the function \code{midas_r_ic_table} again.
+The summary table can be recalculated by using the \code{update} method for \code{midas_r_ic_table}. This function then recalculates all the necessary statistics.
 <<eval=FALSE,echo=TRUE,cache=TRUE,results="hide">>=
-midas_r_ic_table(eqs.ic)
+eqs_ic <- update(eqs_ic)
 @ 
-It should be pointed out that there is no need to provide the weighting function nor a specific lag order in the \code{mls} functions in such a case, since they are defined by the respective potential sets of models under option \code{table} in the function \code{midas_r_ic_table}. Any provided values with \code{mls} (or other similar functions) are over-written by those defined in \code{table}.
+It should be pointed out that there is no need to provide the weighting function nor a specific lag order in the \code{mls} functions in a call to \code{midas_r_ic_table}, since they are defined by the respective potential sets of models under option \code{table}. Any provided values with \code{mls} (or other similar functions) are over-written by those defined in \code{table}.
 
 Finally, the best model in terms of a selected information criterion in a restricted or unrestricted model then is simply obtained by using
 <<eval=FALSE,echo=TRUE,cache=TRUE, results="markup">>=
-modsel(eqs.ic,IC="AIC",type="restricted")
+modsel(eqs_ic,IC="AIC",type="restricted")
 @
 which also prints the usual summary statistics as well as the testing of adequacy of the applied functional restriction using, by default, the \code{hAh_test}. A word of caution is needed here to remind that, as is typical, the empirical size of a test corresponding to a complex model-selection procedure might not correspond directly to a nominal one of a single-step estimation.
 
@@ -1019,9 +1019,9 @@ mtb <- midas_r_ic_table(rv ~ mls(rv, 1:20, 1, nealmon),
                         data = list(rv = spx2_rvol), table = list(rv = tb),
                         test = "hAh_test",
                         weight_gradients = list(), show_progress = FALSE)
-mtb$candlist <- lapply(mtb$candlist, midas_r, Ofunction = "nls")
+mtb$candlist <- lapply(mtb$candlist, update, Ofunction = "nls")
 mtb$test <- "hAhr_test"
-mtb <- midas_r_ic_table(mtb)
+mtb <- update(mtb)
 @
 Here we used two optimization methods to improve the convergence. The function \code{midas_r_ic_table} applies the \code{test} function for each  candidate model. The function \code{hAhr_test} takes a lot of computing time, especialy for models with larger number of lags, so we calculate it only for the second final step, and we restrict the number of lags choose from.  The AIC selects the model with 9 lags:
 
@@ -1032,7 +1032,7 @@ The HAC robust version of \code{hAh_test} again does not reject the null
 hypothesis of the exponential Almon lag specifications.
 
 <<echo=FALSE,cache=FALSE>>=
-bm <- midas_r(bm,Ofunction="optim",method="BFGS")
+bm <- update(bm,Ofunction="optim",method="BFGS")
 @ 
 
 We can look into the forecast performance of both models, using a
