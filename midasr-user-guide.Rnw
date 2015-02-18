@@ -35,9 +35,13 @@
 \Shorttitle{R package \pkg{midasr}}
 
 \Abstract{
-Regression models involving data sampled at different frequencies are of general interest. In this document the \proglang{R} package \pkg{midasr} is described within a MIDAS regression framework  with functional constraints on parameters put forward in work by \citeasnoun{ghysels_etal_midas-02a}, \citeasnoun{ghysels_etal_midas-joe} and
-\citeasnoun{andreou:rmm}.
-}
+ When modeling economic relationships it is increasingly common to encounter data sampled at different frequencies. We introduce \proglang{R} package \pkg{midasr} which enables estimating regression models with variables sampled at different frequencies within a MIDAS regression framework put forward in work by \citeasnoun{ghysels_etal_midas-02a}. In this article we define a general autoregressive MIDAS regression model with multiple variables of different frequencies and show how it can be specified using familiar R formula interface and estimated using various optimisation methods chosen by the researcher. How to perform checking the validity of estimated model both in terms of numerical convergence and statistical adequacy of a chosen regression specification is shown. How to do a information criteria based MIDAS regression model selection is described.  How to test forecasting accuracy of the MIDAS regression model and do a forecast aggregation of different MIDAS regression models. We illustrate the package capabilities using a simulated MIDAS regression model and give two empirical examples of application of MIDAS regression.}
+  
+%The package provides all the usual R methods for a regression model such as
+  
+  
+%Regression models involving data sampled at different frequencies are of general interest. We describe how can be used to estimate such models within a MIDAS regression framework with functional constraints on parameters put forward in work by \citeasnoun{ghysels_etal_midas-02a}. We 
+%}
 \Keywords{MIDAS, specification test}
 \Plainkeywords{MIDAS, specification test}
 \Address{
@@ -73,7 +77,7 @@ URL:\url{http://mif.vu.lt/~zemlys/}
 \section{Introduction}
 
 Regression models involving data sampled at different frequencies are of general interest. In this document we introduce a \proglang{R} package \pkg{midasr} for the regression modeling with the mixed frequency data based on a framework put forward in recent work by \citeasnoun{ghysels_etal_midas-02a}, \citeasnoun{ghysels_etal_midas-joe} and
-\citeasnoun{andreou:rmm} using so called MIDAS, meaning Mi(xed) Da(ta) S(ampling), regressions.\footnote{\cite{ghysels:2013} also developed a package for \proglang{MATLAB} which deals with the estimation and information criteria-based specification of MIDAS regressions as well as forecasting and nowcasting of slow frequency series.} 
+\citeasnoun{andreou:rmm} using so called MIDAS, meaning Mi(xed) Da(ta) S(ampling), regressions.
 
 In a general framework of regressions with functional constraints on parameters, the \pkg{midasr} package not only provides similar functionality within a standard \proglang{R} framework of the model specification comparable to that available in the usual functions \code{lm} or \code{nls}, but also deals with an extended model specification analysis for MIDAS regressions.
 
@@ -83,13 +87,12 @@ Econometric analysis of MIDAS regressions appears in \cite{ghysels:mrf}, \cite{a
 \cite{kvedaras-regression}, \cite{rodriguez2010mixed}, \cite{wohlrabe2009forecasting}, among others.
 
 MIDAS regression can also be viewed as a reduced form representation of the linear projection which emerges from a state space model approach - by reduced form we mean that the MIDAS regression does not require the specification of a full state space system of equations.
-\cite{bai:kalman} show that in some cases the MIDAS regression is an exact representation of the Kalman filter, in other cases it involves approximation errors which are typically small. The Kalman filter, while clearly optimal as far as linear projections goes, has several disadvantages (1) it is more prone to specification errors as a full system of measurement and state equations is required and as a consequence (2) requires a lot more parameters, which in turn results in (3) computational complexities which often limit the scope of applications. In contrast, MIDAS regressions - combined with forecast combination schemes if large data sets are involved (see \cite{AGK_macro}) are computationally easy to implement and more
-prone to specification errors.
+\cite{bai:kalman} show that in some cases the MIDAS regression is an exact representation of the Kalman filter, in other cases it involves approximation errors which are typically small. The Kalman filter, while clearly optimal as far as linear projections goes, has several disadvantages (1) it is more prone to specification errors as a full system of measurement and state equations is required and as a consequence (2) requires a lot more parameters, which in turn results in (3) computational complexities which often limit the scope of applications. In contrast, MIDAS regressions - combined with forecast combination schemes if large data sets are involved (see \cite{AGK_macro}) are computationally easy to implement and are less prone to specification errors.
 
-The key feature of the package is its flexibility in terms of the model formulation and estimation, which allows for the:
+The key feature of the package is its flexibility in terms of the model formulation and estimation, which allows for the\footnote{
+ \cite{ghysels:2013} also developed a package for \proglang{MATLAB} which deals with the estimation and information criteria-based specification of MIDAS regressions as well as forecasting and nowcasting of slow frequency series.  All of the listed features replicate or extend features provided by the said package. The key extensions of package \pkg{midasr} are: the ability to specify any user-defined functional contraints, the ability to include multiple variables of different frequency and different functional constraints, and the ability to test the adequacy of a chosen model specification.}:
 \begin{itemize}
-\item estimation of regression models with its parameters defined (restricted) by a certain functional constraint,
-which can be selected from a standard list or can be customized using a standard \proglang{R} \code{function};
+\item estimation of regression models with its parameters defined (restricted) by a certain functional constraint using familiar \proglang{R} \code{formula} interface allowing any choice of a constraint, which can be selected from a standard list or can be customized using user-defined \proglang{R} functions;
 \item parsimonious aggregation-linked restrictions (as e.g., in \citealp{ghysels:2013}) as a special case;
 \item estimation of MIDAS models with many variables and (numerous) different frequencies;
 \item constrained, partially constrained, or unconstrained estimation of the model;
@@ -98,6 +101,7 @@ which can be selected from a standard list or can be customized using a standard
 \item information criteria and testing-based selection of models;
 \item forecasting and nowcasting functionality, including various forecast combinations.
 \end{itemize}
+
 
 Suppose $\{y_t, t\in \mathbb{Z}\}$ is a univariate process observed at low frequency. Lags of the process are denoted by $By_t$ = $y_{t-1},$ where $B$ is the low frequency lag operator. A MIDAS regression involves linear projections using stochastic processes $\{x_{\tau}^{(i)}, \tau \in \mathbb{Z}\},$
 $i=0,\dots,k,$  observed at a higher frequency, i.e., for each low
