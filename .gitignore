@@ -24,3 +24,5 @@ midasr-user-guide.R
 *.swp
 cache/
 figure/
+.Rproj.user
+*.Rproj
