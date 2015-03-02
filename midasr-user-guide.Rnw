@@ -35,7 +35,7 @@
 \Shorttitle{R package \pkg{midasr}}
 
 \Abstract{
- When modeling economic relationships it is increasingly common to encounter data sampled at different frequencies. We introduce \proglang{R} package \pkg{midasr} which enables estimating regression models with variables sampled at different frequencies within a MIDAS regression framework put forward in work by \citeasnoun{ghysels_etal_midas-02a}. In this article we define a general autoregressive MIDAS regression model with multiple variables of different frequencies and show how it can be specified using familiar R formula interface and estimated using various optimisation methods chosen by the researcher. How to perform checking the validity of estimated model both in terms of numerical convergence and statistical adequacy of a chosen regression specification is shown. How to do a information criteria based MIDAS regression model selection is described.  How to test forecasting accuracy of the MIDAS regression model and do a forecast aggregation of different MIDAS regression models. We illustrate the package capabilities using a simulated MIDAS regression model and give two empirical examples of application of MIDAS regression.}
+ When modeling economic relationships it is increasingly common to encounter data sampled at different frequencies. We introduce \proglang{R} package \pkg{midasr} which enables estimating regression models with variables sampled at different frequencies within a MIDAS regression framework put forward in work by \citeasnoun{ghysels_etal_midas-02a}. In this article we define a general autoregressive MIDAS regression model with multiple variables of different frequencies and show how it can be specified using familiar R formula interface and estimated using various optimisation methods chosen by the researcher. We discuss how to check the validity of estimated model both in terms of numerical convergence and statistical adequacy of a chosen regression specification, how to do the model selection based on a information criteria, how to assess forecasting accuracy of the MIDAS regression model and do a forecast aggregation of different MIDAS regression models. We illustrate package capabilities using a simulated MIDAS regression model and give two empirical examples of application of MIDAS regression.}
   
 %The package provides all the usual R methods for a regression model such as
   
@@ -90,7 +90,7 @@ MIDAS regression can also be viewed as a reduced form representation of the line
 \cite{bai:kalman} show that in some cases the MIDAS regression is an exact representation of the Kalman filter, in other cases it involves approximation errors which are typically small. The Kalman filter, while clearly optimal as far as linear projections goes, has several disadvantages (1) it is more prone to specification errors as a full system of measurement and state equations is required and as a consequence (2) requires a lot more parameters, which in turn results in (3) computational complexities which often limit the scope of applications. In contrast, MIDAS regressions - combined with forecast combination schemes if large data sets are involved (see \cite{AGK_macro}) are computationally easy to implement and are less prone to specification errors.
 
 The key feature of the package is its flexibility in terms of the model formulation and estimation, which allows for the\footnote{
- \cite{ghysels:2013} also developed a package for \proglang{MATLAB} which deals with the estimation and information criteria-based specification of MIDAS regressions as well as forecasting and nowcasting of slow frequency series.  All of the listed features replicate or extend features provided by the said package. The key extensions of package \pkg{midasr} are: the ability to specify any user-defined functional contraints, the ability to include multiple variables of different frequency and different functional constraints, and the ability to test the adequacy of a chosen model specification.}:
+ \cite{ghysels:2013} also developed a package for \proglang{MATLAB} which deals with the estimation and information criteria-based specification of MIDAS regressions as well as forecasting and nowcasting of low frequency series.  All of the \pkg{midasr} features replicate or extend features provided by the said package. The key extensions are: the specification of any user-defined functional contraint, the inclusion of multiple variables of different frequency and different functional constraints, and the testing of the adequacy of a chosen model specification.}:
 \begin{itemize}
 \item estimation of regression models with its parameters defined (restricted) by a certain functional constraint using familiar \proglang{R} \code{formula} interface allowing any choice of a constraint, which can be selected from a standard list or can be customized using user-defined \proglang{R} functions;
 \item parsimonious aggregation-linked restrictions (as e.g., in \citealp{ghysels:2013}) as a special case;
@@ -169,7 +169,6 @@ We require the existence of the continuous second derivative of  functional cons
 As will be shown in the next section, all variants of the usual linear (in terms of variables) MIDAS regression model are covered by regression \eqref{eq1} via the specification of functional constraints. When each restriction function is an identity mapping, one obtain an unrestricted MIDAS regression model.\footnote{See \cite{foroni}.}
 
 \subsection{Frequency alignment}
-
 
 It is instructive to rewrite the model \eqref{l:eqintro} in a matrix notation. We start with a few examples. Suppose $y_t$ is observed quarterly and we want to explain its variation with the variable $x_\tau$, which is observed monthly. Since each quarter has three months, the frequency $m$ is 3 in this example. Suppose we assume that the monthly data in the current and the previous quarter has explanatory power. This means that for each quarter $t$ we want to model $y_t$ as a linear combination of variables $x_{3t},x_{3t-1},x_{3t-2}$ observed in the quarter $t$ and variables $y_{t-1}$ and $x_{3(t-1)},x_{3(t-1)-1},x_{3(t-1)-2}$ observed in the previous quarter $t-1$. In matrix notation the MIDAS model \eqref{l:eqintro} for this example is:
 \begin{align*}
@@ -479,10 +478,12 @@ i.e., three variables (a contemporaneous and two lags) with four low-frequency o
 
 Function \code{mls} is slightly more flexible as the lags included can start from a given order rather than from zero, whereas the function \code{fmls} uses a full lag structure. \code{dmls} performs in addition a first-order differencing of the data which is convenient when working with integrated series.
 
+
 A couple of issues should be taken into account when working with series of different frequencies.
 \begin{itemize}
 \item It is assumed that the numbers of observations of different frequencies match exactly through the frequency ratio ($n_i=nm_i$), and the first and last observations of each series of different frequency are correspondingly aligned (possibly using \code{NA} to account for some missing observations for series of higher frequency).
-\item Because of different lengths of series of various frequencies, the data in the model cannot be kept in one \code{data.frame}. An \proglang{R} object \code{list} needs to bee used if one intends to keep the data in a single object, but it is not required for the further modeling.
+\item Because of different lengths of series of various frequencies, the data for the model cannot be kept in one \code{data.frame}. It is expected that variables for the model are either vectors residing in \proglang{R} global environment, or are passed as elements of a \code{list}. Variables of different frequency can be in the same \code{data.frame}, which in turn should be an element of a list.  
+  
 \end{itemize}
 
 \subsection{An example of simulated MIDAS regression}\label{DGP}
@@ -544,6 +545,17 @@ or, equivalently
 <<echo=TRUE,cache=TRUE, results="hide">>=
 eq.u<-midas_r(y~trend+mls(x,0:7,4)+mls(z,0:16,12),start=NULL)
 @ 
+Note that in this case, \code{midas_r} picks up the variables from the global R environment. It is possible to pass the data explicitly:
+<<echo=TRUE,cache=TRUE, results="hide">>=
+eq.u<-midas_r(y~trend + mls(x,0:7,4)+mls(z,0:16,12),start=NULL,
+              data = list(y=y,trend=trend,x=x,z=z))
+@ 
+The variables of the same frequency can reside in the same \code{data.frame}:
+<<echo=TRUE,cache=TRUE, results="hide">>=
+eq.u<-midas_r(y~trend + mls(x,0:7,4)+mls(z,0:16,12),start=NULL,
+              data = list(data.frame(y=y,trend=trend),x=x,z=z))
+@ 
+In this case, there is no need to name the \code{data.frame} element in the list.
 
 The following \proglang{R} code estimates the constrained case b) using the function \code{midas_r} and reports the NLS estimates $\widehat{\gaga}$ of parameters with the related summary statistics.
 <<echo=TRUE,cache=TRUE, results="markup">>=
@@ -612,7 +624,7 @@ eq_r2 <- midas_r(y ~ trend + mls(x, 0:7, 4, nealmon) +
 @ 
 This way \code{midas_r} calculates the exact gradient of the NLS problem ~\eqref{eqNLS} using the specified gradient function of the restriction. For all the types of the restrictions referenced in table \ref{tab:3} their gradient functions are specified in the package \pkg{midasr}. The naming convention for gradient functions is \code{restriction_name_gradient}. It is not necessary to explicitly pass gradient functions named according to this convention. If \code{weight_gradients} is not \code{NULL} and does not contain the apropriately named element, it is assumed that there exists a gradient function conforming to the gradient naming convention which is then subsequently used.
 
-The gradient and the hessian of the NLS problem are supplied as the output of \code{midas_r}. The numerical approximation of the hessian is calculated using the package \pkg{numDeriv} \cite{numderiv}, the exact gradient is calculated if \code{user.gradient=TRUE} and the numerical approximation otherwise. Having the gradient and hessian calculated allows to check whether the necessary and sufficient conditions for the convergence are satisfied. This is performed by the function \code{deriv_test} which calculates the Euclidean norm of the gradient and the eigenvalues of the hessian. It then tests whether the norm of gradient is close to zero and whether the eigenvalues are positive.
+The gradient and the hessian of the NLS problem are supplied as the output of \code{midas_r}. The gradient is calculated exactly if appropriate gradients for weight functions are supplied as explained above, otherwise the numerical approximation of the gradient is calculated using the package \pkg{numDeriv} \cite{numderiv}. For hessian the numerical approximation is always used. Having the gradient and hessian calculated allows to check whether the necessary and sufficient conditions for the convergence are satisfied. This is performed by the function \code{deriv_test} which calculates the Euclidean norm of the gradient and the eigenvalues of the hessian. It then tests whether the norm of gradient is close to zero and whether the eigenvalues are positive.
 
 
 <<echo=TRUE,cache=TRUE, results="markup">>=
