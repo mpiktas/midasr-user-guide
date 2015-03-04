@@ -391,6 +391,44 @@ $\lambda^{(i)}w(\cdot,1),$&$\lambda^{(i)}w(\cdot,2),$&\dots&$\lambda^{(i)}w(\cdo
 for any $i\in\{0,1,\dots,h\}.$
 From eq. \eqref{eq6} it is clear that any specification of MIDAS regression models which relies on aggregates is a special case of representation \eqref{eq1} with just a specific functional constraint on parameters. On the other hand, not every general constraint $\bebe(L)$ can be represented using periodic aggregates. For instance, in the above characterized example the correspondence necessarily breaches whenever there exists at least one frequency $i,$ for which none of $q\in\mathbb{N}$ satisfies $l=qm_i-1.$
 
+\subsection{Alternative representations of MIDAS regressions}
+The model \eqref{l:eqintro} represents a very general MIDAS regression representation. We give below a sample of other popular MIDAS regression specifications from \cite{andreou2011forecasting}. These specification assume that only one high frequency variable is available. We denote its frequency by $m$.  
+\begin{enumerate}
+    \item DL-MIDAS($p_X$): 
+\begin{align*}
+    y_{t+1}=\mu + \sum_{r=0}^{p_X}\sum_{j=0}^{m-1}\beta_{rm+j}x_{(t-r)m-j}+\eps_{t+1}
+\end{align*}
+\item ADL-MIDAS($p_Y$,$p_X$): 
+    \begin{align*}
+    y_{t+1}=\mu + \sum_{j=0}^{p_Y}\mu_jy_{t-j}+\sum_{r=0}^{p_X}\sum_{j=0}^{m-1}\beta_{rm+j}x_{(t-r)m-j}+\eps_{t+1}
+\end{align*}
+
+\item FADL-MIDAS($p_F$,$p_X$,$p_Y$):
+\begin{align*}
+    y_{t+1}=\mu + \sum_{i=0}^{p_F}\alpha_iF_{t-i}+\sum_{j=0}^{p_Y}\mu_jy_{t-j}+\sum_{r=0}^{p_X}\sum_{j=0}^{m-1}\beta_{rm+j}x_{(t-r)m-j}+\eps_{t+1},
+\end{align*}
+where $F_t$ is a factor derived from additional data.
+
+\item ADL-MIDAS-M($p_X$,$p_Y$), or multiplicative MIDAS: 
+    \begin{align*}
+    y_{t+1}=\mu + \sum_{j=0}^{p_Y}\mu_jy_{t-j}+\sum_{r=0}^{p_X}\alpha_rX_{t-r}+\eps_{t+1},
+\end{align*}
+where $X_{t-r}=\sum_{j=0}^{m_i-1}\beta_jx_{(t-r)m-j}$.
+ 
+\item MIDAS with leads, where it is assumed that we have only $J<m$ observations of high frequency variable $x_\tau$ are available for period $t+1$. 
+    \begin{align*}
+	y_{t+1}=\mu+ \sum_{j=0}^{p_Y}\mu_jY_{t-j}+\sum_{j=1}^{J}\beta_{-j}x_{tm+j}+
+\sum_{r=0}^{p_X}\sum_{j=0}^{m-1}\beta_{rm+j}x_{(t-r)m-j}+\eps_{t+1}
+\end{align*}
+\end{enumerate}
+
+The parametric restriction is usually placed on coefficients $\beta_j$ in these representations in the usual manner of \eqref{l:eqres}, i.e. it is assumed that $\beta_j=f(\gaga,j)$, for chosen function $f$ with parameters $\gaga$.
+
+If we compare these representations with \eqref{l:eqintro} the notable differences are the specification of $y_{t+1}$ instead of $y_t$ as a response variable and 
+a preference to make maximum high frequency lag be a multiple of the corresponding  frequency. The multiplicative MIDAS is the special case of aggregates based MIDAS specification. It is evident then that all these representations are special cases of \eqref{l:eqintro}.
+
+Various examples illustrating MIDAS regressions specifications together with corresponding \proglang{R} code are also given in the table \ref{tab:3}. 
+
 \subsection{Specification selection and adequacy testing}
 
 Besides the usual considerations about the properties of the error term,  there are two main questions about the specification of the MIDAS regression models. First, suitable functional constraints need to be selected, since their choice will affect the precision of the model. 
