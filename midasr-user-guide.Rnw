@@ -339,7 +339,7 @@ $x_s:=\xi+(1-\xi)h(s),\ h(s):=(s-1)/({m}-1),$ with some marginally small quantit
 \hline\hline
 \end{tabular}
 }
-\caption{\label{tab:1} A sample of usual weighting schemes in aggregation-based MIDAS specifications.}
+\caption{\label{tab:1} A sample of weighting schemes in aggregation-based MIDAS specifications.}
 \end{center}
 \end{table}
 
