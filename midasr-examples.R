@@ -14,98 +14,98 @@ trend <- c(1:n)
 x <- rnorm(4 * n)
 z <- rnorm(12 * n)
 ## Exponential Almon polynomial constraint-consistent coefficients
-fn.x <- nealmon(p = c(1, -0.5), d = 8)
-fn.z <- nealmon(p = c(2, 0.5, -0.1), d = 17)
+fn_x <- nealmon(p = c(1, -0.5), d = 8)
+fn_z <- nealmon(p = c(2, 0.5, -0.1), d = 17)
 ## Simulated low-frequency series (e.g. yearly)
-y <- 2 + 0.1 * trend + mls(x, 0:7, 4) %*% fn.x + mls(z, 0:16, 12) %*% fn.z + rnorm(n)
+y <- 2 + 0.1 * trend + mls(x, 0:7, 4) %*% fn_x + mls(z, 0:16, 12) %*% fn_z + rnorm(n)
 ## Figure 1 (coefficients)
-fn.xNA <- c(fn.x, rep(NA, length(fn.z) - length(fn.x)))
-plot(fn.z, col = "red")
-points(fn.xNA)
+fn_xNA <- c(fn_x, rep(NA, length(fn_z) - length(fn_x)))
+plot(fn_z, col = "red")
+points(fn_xNA)
 
 
 # Examples of MIDAS regression specification in midasr --------------------
 
 ## OLS using lm
-eq.u <- lm(y ~ trend + mls(x, k = 0:7, m = 4) + mls(z, k = 0:16, m = 12))
-eq.u <- midas_u(y ~ trend + mls(x, 0:7, 4) + mls(z, 0:16, 12))
-summary(eq.u)
+eq_u <- lm(y ~ trend + mls(x, k = 0:7, m = 4) + mls(z, k = 0:16, m = 12))
+eq_u <- midas_u(y ~ trend + mls(x, 0:7, 4) + mls(z, 0:16, 12))
+summary(eq_u)
 
 ## NLS using midas_r
-eq.r <- midas_r(y ~ trend + mls(x, 0:7, 4, nealmon) + mls(z, 0:16, 12, nealmon), start = list(x = c(1, 
+eq_r <- midas_r(y ~ trend + mls(x, 0:7, 4, nealmon) + mls(z, 0:16, 12, nealmon), start = list(x = c(1, 
     -0.5), z = c(2, 0.5, -0.1)))
-summary(eq.r)
-deriv_tests(eq.r, tol = 1e-06)
-coef(eq.r)
-coef(eq.r, midas = TRUE)
+summary(eq_r)
+deriv_tests(eq_r, tol = 1e-06)
+coef(eq_r)
+coef(eq_r, midas = TRUE)
 amweights(p = c(1, -0.5), d = 8, m = 4, weight = nealmon, type = "C")
 nealmon(p = c(1, -0.5), d = 4)
 ## NLS using midas_r with aggregates
-eq.r <- midas_r(y ~ trend + mls(x, 0:7, 4, mmweights, nealmon, "C") + mls(z, 0:16, 12, nealmon), 
+eq_r <- midas_r(y ~ trend + mls(x, 0:7, 4, mmweights, nealmon, "C") + mls(z, 0:16, 12, nealmon), 
     start = list(x = c(1, -0.5), z = c(2, 0.5, -0.1)))
-summary(eq.r)
+summary(eq_r)
 ## Table 3-related NLS variations using midas_r (trend dropped in the table and can be
 ## omitted here)
 fn <- gompertzp
-eq.r1 <- midas_r(y ~ trend + mls(x, 0:7, 4, nealmon) + mls(z, 0:16, 12, fn), start = list(x = c(1, 
+eq_r1 <- midas_r(y ~ trend + mls(x, 0:7, 4, nealmon) + mls(z, 0:16, 12, fn), start = list(x = c(1, 
     -0.5), z = c(1, 0.5, 0.1)))
-summary(eq.r1)
-eq.r2 <- midas_r(y ~ trend + mls(x, 0:7, 4) + mls(z, 0:16, 12, nealmon), start = list(z = c(1, 
+summary(eq_r1)
+eq_r2 <- midas_r(y ~ trend + mls(x, 0:7, 4) + mls(z, 0:16, 12, nealmon), start = list(z = c(1, 
     -0.5)))
-summary(eq.r2)
-eq.r3 <- midas_r(y ~ trend + mls(y, 1:2, 1) + mls(x, 0:7, 4, nealmon), start = list(x = c(1, 
+summary(eq_r2)
+eq_r3 <- midas_r(y ~ trend + mls(y, 1:2, 1) + mls(x, 0:7, 4, nealmon), start = list(x = c(1, 
     -0.5)))
-summary(eq.r3)
-eq.r4 <- midas_r(y ~ trend + mls(y, 1:2, 1, "*") + mls(x, 0:7, 4, nealmon), start = list(x = c(1, 
+summary(eq_r3)
+eq_r4 <- midas_r(y ~ trend + mls(y, 1:2, 1, "*") + mls(x, 0:7, 4, nealmon), start = list(x = c(1, 
     -0.5)))
-summary(eq.r4)
-eq.r5 <- midas_r(y ~ trend + mls(y, 1:4, 1, nealmon) + mls(x, 0:7, 4, nealmon), start = list(y = c(1, 
+summary(eq_r4)
+eq_r5 <- midas_r(y ~ trend + mls(y, 1:4, 1, nealmon) + mls(x, 0:7, 4, nealmon), start = list(y = c(1, 
     -0.5), x = c(1, -0.5)))
-summary(eq.r5)
-eq.r6 <- midas_r(y ~ trend + mls(x, 0:7, 4, amweights, nealmon, "A"), start = list(x = c(1, 
+summary(eq_r5)
+eq_r6 <- midas_r(y ~ trend + mls(x, 0:7, 4, amweights, nealmon, "A"), start = list(x = c(1, 
     1, 1, -0.5)))
-summary(eq.r6)
-eq.r7 <- midas_r(y ~ trend + mls(x, 0:7, 4, amweights, nealmon, "B"), start = list(x = c(1, 
+summary(eq_r6)
+eq_r7 <- midas_r(y ~ trend + mls(x, 0:7, 4, amweights, nealmon, "B"), start = list(x = c(1, 
     1, -0.5)))
-summary(eq.r7)
-eq.r8 <- midas_r(y ~ trend + mls(x, 0:7, 4, amweights, nealmon, "C"), start = list(x = c(1, 
+summary(eq_r7)
+eq_r8 <- midas_r(y ~ trend + mls(x, 0:7, 4, amweights, nealmon, "C"), start = list(x = c(1, 
     -0.5)))
-summary(eq.r8)
+summary(eq_r8)
 fn <- function(p, d) {
     p[1] * c(1:d)^p[2]
 }
-eq.r9 <- midas_r(y ~ trend + mls(x, 0:101, 4, fn), start = list(x = rep(0, 2)))
-summary(eq.r9)
+eq_r9 <- midas_r(y ~ trend + mls(x, 0:101, 4, fn), start = list(x = rep(0, 2)))
+summary(eq_r9)
 
 
 # Testing the adequacy of MIDAS regression --------------------------------
 
 ## DGP-consistent specification
-eq.r <- midas_r(y ~ trend + mls(x, 0:7, 4, nealmon) + mls(z, 0:16, 12, nealmon), start = list(x = c(1, 
+eq_r <- midas_r(y ~ trend + mls(x, 0:7, 4, nealmon) + mls(z, 0:16, 12, nealmon), start = list(x = c(1, 
     -0.5), z = c(2, 0.5, -0.1)))
-summary(eq.r)
-hAh.test(eq.r)
-hAhr.test(eq.r)
+summary(eq_r)
+hAh_test(eq_r)
+hAhr_test(eq_r)
 ## Mis-specification of constraint on z coefficients
-eq.rb <- midas_r(y ~ trend + mls(x, 0:7, 4, nealmon) + mls(z, 0:12, 12, nealmon), start = list(x = c(1, 
+eq_rb <- midas_r(y ~ trend + mls(x, 0:7, 4, nealmon) + mls(z, 0:12, 12, nealmon), start = list(x = c(1, 
     -0.5), z = c(2, -0.1)))
-hAh.test(eq.rb)
-hAhr.test(eq.rb)
-summary(eq.rb)
+hAh_test(eq_rb)
+hAhr_test(eq_rb)
+summary(eq_rb)
 
 
 # Model selection ---------------------------------------------------------
 
 ## Potential sets of models
-set.x <- expand_weights_lags(weights = c("nealmon", "almonp"), from = 0, to = c(5, 10), m = 1, 
+set_x <- expand_weights_lags(weights = c("nealmon", "almonp"), from = 0, to = c(5, 10), m = 1, 
     start = list(nealmon = rep(1, 2), almonp = rep(1, 3)))
-set.z <- expand_weights_lags(c("nealmon", "nealmon"), 0, c(10, 20), 1, start = list(nealmon = rep(1, 
+set_z <- expand_weights_lags(c("nealmon", "nealmon"), 0, c(10, 20), 1, start = list(nealmon = rep(1, 
     2), nealmon = rep(1, 3)))
 expand_weights_lags(weights = c("nealmon", "nbeta"), from = 1, to = c(2, 3), m = 1, start = list(nealmon = rep(0, 
     2), nbeta = rep(0.5, 3)))
 ## Estimation and selection of models
-eqs.ic <- midas_r_ic_table(y ~ trend + mls(x, 0, m = 4) + fmls(z, 0, m = 12), table = list(z = set.z, 
-    x = set.x), start = c(`(Intercept)` = 0, trend = 0))
+eqs.ic <- midas_r_ic_table(y ~ trend + mls(x, 0, m = 4) + fmls(z, 0, m = 12), table = list(z = set_z, 
+    x = set_x), start = c(`(Intercept)` = 0, trend = 0))
 mod <- modsel(eqs.ic, IC = "AIC", type = "restricted")
 
 
@@ -176,10 +176,10 @@ avgrecf$accuracy
 
 # Inspect objects produced by midasr --------------------------------------
 
-objects(eq.r)
+objects(eq_r)
 objects(cbfc)
 ## Accessed e.g. by
-eq.r$opt
+eq_r$opt
 cbfc$bestlist
 ############ Info ### A specific function
 `?`(select_and_forecast)
