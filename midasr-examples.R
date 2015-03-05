@@ -19,9 +19,8 @@ fn_z <- nealmon(p = c(2, 0.5, -0.1), d = 17)
 ## Simulated low-frequency series (e.g. yearly)
 y <- 2 + 0.1 * trend + mls(x, 0:7, 4) %*% fn_x + mls(z, 0:16, 12) %*% fn_z + rnorm(n)
 ## Figure 1 (coefficients)
-fn_xNA <- c(fn_x, rep(NA, length(fn_z) - length(fn_x)))
 plot(fn_z, col = "red")
-points(fn_xNA)
+points(fn_x)
 
 
 # Examples of MIDAS regression specification in midasr --------------------
@@ -41,7 +40,7 @@ coef(eq_r, midas = TRUE)
 amweights(p = c(1, -0.5), d = 8, m = 4, weight = nealmon, type = "C")
 nealmon(p = c(1, -0.5), d = 4)
 ## NLS using midas_r with aggregates
-eq_r <- midas_r(y ~ trend + mls(x, 0:7, 4, mmweights, nealmon, "C") + mls(z, 0:16, 12, nealmon), 
+eq_r <- midas_r(y ~ trend + mls(x, 0:7, 4, amweights, nealmon, "C") + mls(z, 0:16, 12, nealmon), 
     start = list(x = c(1, -0.5), z = c(2, 0.5, -0.1)))
 summary(eq_r)
 ## Table 3-related NLS variations using midas_r (trend dropped in the table and can be

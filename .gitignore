@@ -1,4 +1,5 @@
 # History files
+*.synctex.gz
 .Rhistory
 .RData
 # Example code in package build process
