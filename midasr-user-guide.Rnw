@@ -90,7 +90,7 @@ MIDAS regression can also be viewed as a reduced form representation of the line
 \cite{bai:kalman} show that in some cases the MIDAS regression is an exact representation of the Kalman filter, in other cases it involves approximation errors which are typically small. The Kalman filter, while clearly optimal as far as linear projections goes, has several disadvantages (1) it is more prone to specification errors as a full system of measurement and state equations is required and as a consequence (2) requires a lot more parameters, which in turn results in (3) computational complexities which often limit the scope of applications. In contrast, MIDAS regressions - combined with forecast combination schemes if large data sets are involved (see \cite{AGK_macro}) are computationally easy to implement and are less prone to specification errors.
 
 The key feature of the package is its flexibility in terms of the model formulation and estimation, which allows for the\footnote{
- \cite{ghysels:2013} also developed a package for \proglang{MATLAB} which deals with the estimation and information criteria-based specification of MIDAS regressions as well as forecasting and nowcasting of low frequency series.  All of the \pkg{midasr} features replicate or extend features provided by the said package. The key extensions are: the specification of any user-defined functional contraint, the inclusion of multiple variables of different frequency and different functional constraints, and the testing of the adequacy of a chosen model specification.}:
+ \cite{ghysels:2013} also developed a package for \proglang{MATLAB} which deals with the estimation and information criteria-based specification of MIDAS regressions as well as forecasting and nowcasting of low frequency series.  All of the \pkg{midasr} features replicate or extend features provided by the said package. The key extensions are: the specification of any user-defined functional contraint, the inclusion of multiple variables of different frequency and different functional constraints, the testing of the adequacy of a chosen model specification, and the option to calculate standard errors of the parameters robust to serial correlation and heteroscedasticity in regression disturbances}:
 \begin{itemize}
 \item estimation of regression models with its parameters defined (restricted) by a certain functional constraint using familiar \proglang{R} \code{formula} interface allowing any choice of a constraint, which can be selected from a standard list or can be customized using user-defined \proglang{R} functions;
 \item parsimonious aggregation-linked restrictions (as e.g., in \citealp{ghysels:2013}) as a special case;
@@ -391,6 +391,48 @@ $\lambda^{(i)}w(\cdot,1),$&$\lambda^{(i)}w(\cdot,2),$&\dots&$\lambda^{(i)}w(\cdo
 for any $i\in\{0,1,\dots,h\}.$
 From eq. \eqref{eq6} it is clear that any specification of MIDAS regression models which relies on aggregates is a special case of representation \eqref{eq1} with just a specific functional constraint on parameters. On the other hand, not every general constraint $\bebe(L)$ can be represented using periodic aggregates. For instance, in the above characterized example the correspondence necessarily breaches whenever there exists at least one frequency $i,$ for which none of $q\in\mathbb{N}$ satisfies $l=qm_i-1.$
 
+\subsection{Specification selection and adequacy testing}
+
+Besides the usual considerations about the properties of the error term,  there are two main questions about the specification of the MIDAS regression models. First, suitable functional constraints need to be selected, since their choice will affect the precision of the model. 
+Second, the appropriate maximum lag orders need to be chosen.
+
+One way to address both issues together is to use some information criterion to select the best model in terms of the parameter restriction and the lag orders using either in- or out-of-sample precision measures. Functions \code{midas_r_ic_table} and \code{amidas\_table} of the package allow the user to make an in-sample choice using some usual information criteria, such as AIC and BIC, and a user-specified list of functional constraints.\footnote{Although aimed at forecasting, the function \code{select\_and\_forecast} can also be used to perform the selection of models relying on their out-of-sample performance.}
+
+Another way is to test the adequacy of the chosen functional constraints. For instance, whenever the autoregressive terms in model \eqref{eq1} are present ($p>0$), it was pointed out by \cite{ghysels:mrf} that, in the general case, $\phph(L)=\bebe(L)/\alpha(B)$ will have seasonal pattern thus corresponding to some seasonal impact of explanatory variables on the dependent one in a pure distributed lag model (i.e., without autoregressive terms). To avoid such an effect whenever it is not (or is believed to be not) relevant, \cite{clements2008mfm} proposed to us a common factor restriction which can be formulated as a common polynomial restriction with a constraint on the polynomial $\bebe(L)$ to satisfy a factorization $\bebe(L)=\alpha(B)\phph(L),$ so that inverting equation \eqref{eq1} in terms of the polynomial $\alpha(B)$ leaves  $\phph(L)$ unaffected i.e., without creating/destroying any (possibly absent) seasonal pattern of the impact of explanatory variables.
+  However, there is little if any knowledge a priori whether the impact in the distributed lag model should be seasonal or not. Hence, an explicit testing of adequacy of the model and, in particular, of the imposed functional constraint is obviously useful.
+
+  Let $\bebe$ denote a vector of all coefficients of polynomial $\bebe(z)$ defined in eq. \eqref{eq1}, while $\ff_{\gaga}$ stand for the corresponding vector of coefficients restricted by a (possibly incorrect) functional constraint in $\ff_{\gaga}(z).$ Let $\bm{\widehat{\beta}}$  denote the respective OLS estimates of unconstrained model i.e., where functional restrictions of parameters are \textit{not} taken into account. Let $\bm{\hat{\ff}_{\gaga}}:=\ff_{\gaga}\big|_{\gaga=\widehat\gaga}$ denote a vector of the corresponding quantities obtained from the restricted model relying on the NLS estimates $\widehat{\gaga}$ as defined in eq. \eqref{eqNLS}. Denote by $\alal,\ \widehat\alal,$ and $\widehat\alal_{\gamma}$ the corresponding vectors of coefficients of polynomial $\alpha(z),$ its OLS estimates in an unrestricted model, and its NLS estimates in a restricted model.\footnote{Recall that unconstrained $\alal$ elements make a subset of parameter vector $\gaga$ of a constrained model.}
+ Let $\thth:=(\alal^\top,\bebe^\top)^\top,$  $\widehat\thth:=(\widehat\alal^\top,\widehat\bebe^\top)^\top,$ and $\widetilde\thth:=(\widehat\alal_{\gaga}^\top,\hat\ff_{\gaga}^\top)^\top$  signify the corresponding vectors of all coefficients in eq. \eqref{eq1}.
+Then,
+under the null hypothesis of $\exists \ \gaga\in\mathbb{R}^q\text{ such that }\ff_{\gaga}=\bebe,$ it holds
+\begin{align*}
+  (\bm{\widehat{\thth}}-{\bm{\widetilde{\thth}}})^\top\bm{A}(\bm{\widehat{\thth}}-\bm{\widetilde{\thth}})\sim \chi^2\big(d-q\big),
+\end{align*}
+where $\bm{A}$ is a suitable normalization matrix (see \citealp{kvedaras:2012} for a standard and \citealp{kvedaras:2013} for a HAC-robust versions of the test), and $q=\dim(\gaga)$ and $d=\dim(\thth)$  stand for the number of parameters in a restricted and unrestricted models, respectively. Functions \code{hAh_test} and \code{hAhr_test} of the package implement the described testing as will be illustrated later.
+
+\subsection{Forecasting}
+
+Let us write model \eqref{eq1} for period $t+1$ as
+\begin{equation}\label{eq8a}
+y_{t+1}=\alal^\top\yy_{t,0}+\bebe(L)^\top\xx_{t+1,0}+\e_{t+1},
+\end{equation}
+where $\yy_{t,0}=(y_{t},\dots,y_{t-p+1})^\top$ and $\alal=(\alpha_{1},\alpha_{2},\dots,\alpha_{p})^\top$ is a vector of parameters of the autoregressive terms. This representation is well suited for (one step ahead) conditional forecasting of $y_{t+1},$ provided that the information on the explanatory variables is available. If it were absent, forecasts of $\xx_{t+1,0}$ would be also necessary from a joint process of $\{y_t,\xx_{t,0}\}$ which might be difficult to specify and estimate correctly, especially, bearing in mind the presence of data with mixed frequencies. Instead, a direct approach to forecasting is often applied in the MIDAS framework. Namely, given an information set available up to a moment $t$ defined by $\mathcal{I}_{t,0}=\{\yy_{t,j},\xx_{t,j}\}_{j=0}^{\infty},$ where 
+\begin{align*}
+ \yy_{t,j}&=(y_{t-j},...,y_{t-j-p+1})^\top\\
+ \xx_{t,j}&=(x^{(0)}_{tm_0},...,x^{(i)}_{tm_i},...,x^{(k)}_{tm_k})^\top,
+\end{align*}
+an $h$-step ahead direct forecast
+\begin{equation}\label{eq8}
+\tilde y_{t+h}=E\left(y_{t+h}\big|\mathcal{I}_{t,0}\right)=\alal_h^\top\yy_{t,0}+\bebe_h(L)^\top\xx_{t,0},\ h\in\mathbb{N},
+\end{equation}
+can be formed leaning on a model linked to a corresponding conditional expectation
+$$
+y_{t+h}=\alal_h^\top\yy_{t,0}+\bebe_h(L)^\top\xx_{t,0}+\e_{h,t},\ E\left(\e_{h,t}\big|\mathcal{I}_{t,0}\right),
+$$
+where $\alal_h$ and $\bebe_h(L)$ are the respective horizon $h$-specific parameters. Note that, in principle, these conditional expectations have a form of representation \eqref{eq1} with certain restrictions on the original lag polynomials of coefficients. Hence, in the  general case,  the suitable restrictions for each $h$ will have a different form.
+
+Given periods $h=1,2,\dots,$ and a selected model or a list of specifications to be considered, package \pkg{midasr} provides the point forecasts corresponding to the estimated analogue of eq. \eqref{eq8}  evaluates the precision of different specifications, and performs weighted forecasting using the framework defined in \cite{ghysels:2013}.
+
 \subsection{Alternative representations of MIDAS regressions}
 The model \eqref{l:eqintro} represents a very general MIDAS regression representation. We give below a sample of other popular MIDAS regression specifications from \cite{andreou2011forecasting}. These specification assume that only one high frequency variable is available. We denote its frequency by $m$.  
 \begin{enumerate}
@@ -428,48 +470,6 @@ If we compare these representations with \eqref{l:eqintro} the notable differenc
 a preference to make maximum high frequency lag be a multiple of the corresponding  frequency. The multiplicative MIDAS is the special case of aggregates based MIDAS specification. It is evident then that all these representations are special cases of \eqref{l:eqintro}.
 
 Various examples illustrating MIDAS regressions specifications together with corresponding \proglang{R} code are also given in the table \ref{tab:3}. 
-
-\subsection{Specification selection and adequacy testing}
-
-Besides the usual considerations about the properties of the error term,  there are two main questions about the specification of the MIDAS regression models. First, suitable functional constraints need to be selected, since their choice will affect the precision of the model. 
-Second, the appropriate maximum lag orders need to be chosen.
-
-One way to address both issues together is to use some information criterion to select the best model in terms of the parameter restriction and the lag orders using either in- or out-of-sample precision measures. Functions \code{midas_r_ic_table} and \code{amidas\_table} of the package allow the user to make an in-sample choice using some usual information criteria, such as AIC and BIC, and a user-specified list of functional constraints.\footnote{Although aimed at forecasting, the function \code{select\_and\_forecast} can also be used to perform the selection of models relying on their out-of-sample performance.}
-
-Another way is to test the adequacy of the chosen functional constraints. For instance, whenever the autoregressive terms in model \eqref{eq1} are present ($p>0$), it was pointed out by \cite{ghysels:mrf} that, in the general case, $\phph(L)=\bebe(L)/\alpha(B)$ will have seasonal pattern thus corresponding to some seasonal impact of explanatory variables on the dependent one in a pure distributed lag model (i.e., without autoregressive terms). To avoid such an effect whenever it is not (or is believed to be not) relevant, \cite{clements2008mfm} proposed to us a common factor restriction which can be formulated as a common polynomial restriction with a constraint on the polynomial $\bebe(L)$ to satisfy a factorization $\bebe(L)=\alpha(B)\phph(L),$ so that inverting equation \eqref{eq1} in terms of the polynomial $\alpha(B)$ leaves  $\phph(L)$ unaffected i.e., without creating/destroying any (possibly absent) seasonal pattern of the impact of explanatory variables.
-  However, there is little if any knowledge a priori whether the impact in the distributed lag model should be seasonal or not. Hence, an explicit testing of adequacy of the model and, in particular, of the imposed functional constraint is obviously useful.
-
-  Let $\bebe$ denote a vector of all coefficients of polynomial $\bebe(z)$ defined in eq. \eqref{eq1}, while $\ff_{\gaga}$ stand for the corresponding vector of coefficients restricted by a (possibly incorrect) functional constraint in $\ff_{\gaga}(z).$ Let $\bm{\widehat{\beta}}$  denote the respective OLS estimates of unconstrained model i.e., where functional restrictions of parameters are \textit{not} taken into account. Let $\bm{\hat{\ff}_{\gaga}}:=\ff_{\gaga}\big|_{\gaga=\widehat\gaga}$ denote a vector of the corresponding quantities obtained from the restricted model relying on the NLS estimates $\widehat{\gaga}$ as defined in eq. \eqref{eqNLS}. Denote by $\alal,\ \widehat\alal,$ and $\widehat\alal_{\gamma}$ the corresponding vectors of coefficients of polynomial $\alpha(z),$ its OLS estimates in an unrestricted model, and its NLS estimates in a restricted model.\footnote{Recall that unconstrained $\alal$ elements make a subset of parameter vector $\gaga$ of a constrained model.}
- Let $\thth:=(\alal^\top,\bebe^\top)^\top,$  $\widehat\thth:=(\widehat\alal^\top,\widehat\bebe^\top)^\top,$ and $\widetilde\thth:=(\widehat\alal_{\gaga}^\top,\hat\ff_{\gaga}^\top)^\top$  signify the corresponding vectors of all coefficients in eq. \eqref{eq1}.
-Then,
-under the null hypothesis of $\exists \ \gaga\in\mathbb{R}^q\text{ such that }\ff_{\gaga}=\bebe,$ it holds
-\begin{align*}
-  (\bm{\widehat{\thth}}-{\bm{\widetilde{\thth}}})^\top\bm{A}(\bm{\widehat{\thth}}-\bm{\widetilde{\thth}})\sim \chi^2\big(d-q\big),
-\end{align*}
-where $\bm{A}$ is a suitable normalization matrix (see \citealp{kvedaras:2012} for a standard and \citealp{kvedaras:2013} for a HAC-robust versions of the test), and $q=\dim(\gaga)$ and $d=\dim(\thth)$  stand for the number of parameters in a restricted and unrestricted models, respectively. Functions \code{hAh_test} and \code{hAhr_test} of the package implement the described testing as will be illustrated later.
-
-\subsection{Forecasting}
-
-Let us write model \eqref{eq1} for period $t+1$ as
-\begin{equation}\label{eq8a}
-y_{t+1}=\alal^\top\yy_{t,0}+\bebe(L)^\top\xx_{t+1,0}+\e_{t+1},
-\end{equation}
-where $\yy_{t,0}=(y_{t},\dots,y_{t-p+1})^\top$ and $\alal=(\alpha_{1},\alpha_{2},\dots,\alpha_{p})^\top$ is a vector of parameters of the autoregressive terms. This representation is well suited for (one step ahead) conditional forecasting of $y_{t+1},$ provided that the information on the explanatory variables is available. If it were absent, forecasts of $\xx_{t+1,0}$ would be also necessary from a joint process of $\{y_t,\xx_{t,0}\}$ which might be difficult to specify and estimate correctly, especially, bearing in mind the presence of data with mixed frequencies. Instead, a direct approach to forecasting is often applied in the MIDAS framework. Namely, given an information set available up to a moment $t$ defined by $\mathcal{I}_{t,0}=\{\yy_{t,j},\xx_{t,j}\}_{j=0}^{\infty},$ where 
-\begin{align*}
- \yy_{t,j}&=(y_{t-j},...,y_{t-j-p+1})^\top\\
- \xx_{t,j}&=(x^{(0)}_{tm_0},...,x^{(i)}_{tm_i},...,x^{(h)}_{tm_h})^\top,
-\end{align*}
-an $\ell$-step ahead direct forecast
-\begin{equation}\label{eq8}
-\tilde y_{t+\ell}=E\left(y_{t+\ell}\big|\mathcal{I}_{t,0}\right)=\alal_\ell^\top\yy_{t,0}+\bebe_\ell(L)^\top\xx_{t,0},\ \ell\in\mathbb{N},
-\end{equation}
-can be formed leaning on a model linked to a corresponding conditional expectation
-$$
-y_{t+\ell}=\alal_\ell^\top\yy_{t,0}+\bebe_\ell(L)^\top\xx_{t,0}+\e_{\ell,t},\ E\left(\e_{\ell,t}\big|\mathcal{I}_{t,0}\right),
-$$
-where $\alal_\ell$ and $\bebe_\ell(L)$ are the respective horizon $\ell$-specific parameters. Note that, in principle, these conditional expectations have a form of representation \eqref{eq1} with certain restrictions on the original lag polynomials of coefficients. Hence, in the  general case,  the suitable restrictions for each $\ell$ will have a different form.
-
-Given periods $\ell=1,2,\dots,$ and a selected model or a list of specifications to be considered, package \pkg{midasr} provides the point forecasts corresponding to the estimated analogue of eq. \eqref{eq8}  evaluates the precision of different specifications, and performs weighted forecasting using the framework defined in \cite{ghysels:2013}.
 
 
 \section{Implementation in {midasr} package}\label{Implementation}
