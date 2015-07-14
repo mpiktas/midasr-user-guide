@@ -30,9 +30,9 @@
 \Plainauthor{Eric Ghysels, Virmantas Kvedaras, Vaidotas Zemlys}
 
 \title{Mixed Frequency Data Sampling Regression Models: the \proglang{R}
-    Package \pkg{midasr}}
-\Plaintitle{Mixed Frequency Data Sampling Regression Models: The R Package midasr}
-\Shorttitle{R package \pkg{midasr}}
+    Package \pkg{Midasr}}
+\Plaintitle{Mixed Frequency Data Sampling Regression Models: the R Package Midasr}
+\Shorttitle{R Package \pkg{Midasr}}
 
 \Abstract{
  When modeling economic relationships it is increasingly common to encounter data sampled at different frequencies. We introduce \proglang{R} package \pkg{midasr} which enables estimating regression models with variables sampled at different frequencies within a MIDAS regression framework put forward in work by \citeasnoun{ghysels_etal_midas-02a}. In this article we define a general autoregressive MIDAS regression model with multiple variables of different frequencies and show how it can be specified using familiar R formula interface and estimated using various optimisation methods chosen by the researcher. We discuss how to check the validity of estimated model both in terms of numerical convergence and statistical adequacy of a chosen regression specification, how to do the model selection based on a information criteria, how to assess forecasting accuracy of the MIDAS regression model and do a forecast aggregation of different MIDAS regression models. We illustrate capabilities of the package with a simulated MIDAS regression model and give two empirical examples of application of MIDAS regression.}
@@ -135,7 +135,9 @@ render_sweave()
 
 \begin{figure}[htbp]
  <<echo=FALSE,fig.show="hold",fig.height=3.5>>=
-opts_chunk$set(tidy=TRUE,tidy.opts=list(keep.blank.line=FALSE, width.cutoff=60),highlight=FALSE,prompt=TRUE,comment=NA,background="#FFFFFF")
+opts_chunk$set(tidy=TRUE,
+               tidy.opts=list(blank=FALSE, width.cutoff = 60, indent = 2),
+               highlight = FALSE, prompt = TRUE, comment = NA,background="#FFFFFF")
 options(prompt="R> ")
 suppressMessages(library("tseries"))
 suppressMessages(library("midasr"))
@@ -238,7 +240,7 @@ Let us examine another example. Suppose we have another variable $z_t$ observed 
 	\eps_n
     \end{bmatrix}
 \end{align*}
-In this example we have aligned $x_{\tau}$ into a vector $(x_{3t},..,x_{3t-5})^\top$ and $z_{\tau}$ into a vector $(z_{12t},\dots,z_{12t-23})^\top.$ Again we require that the number of observations of high frequency variables are multiple of $n$, with multiplication factor being the corresponding frequencies. This is not a restrictive assumption in practical applications as will be further explained in the section \ref{Implementation}.
+In this example we have aligned $x_{\tau}$ into a vector $(x_{3t},..,x_{3t-5})^\top$ and $z_{\tau}$ into a vector $(z_{12t},\dots,z_{12t-23})^\top.$ Again we require that the number of observations of high frequency variables are multiple of $n$, with multiplication factor being the corresponding frequencies. This is not a restrictive assumption in practical applications as will be further explained in the Section \ref{Implementation}.
 
 Let us return to the general case of the model \eqref{l:eqintro}. We \textit{align the frequency} of high-frequency variable $x_\tau$ by transforming it to the low-frequency vector $(x_{tm_i}^{(i)},x_{tm_i-1}^{(i)},\dots,x_{tm_i-l}^{(i)})^\top$. The model $\eqref{l:eqintro}$ is then expressed in the matrix notation as follows:
 \begin{align*}
@@ -292,9 +294,9 @@ $$
 for each $(i,j)\in\{0,1,\dots,k\}\times\{0,1,\dots,l\}.$
 A number of numerical algorithms are readily available in \proglang{R}. By default, the \code{optim} optimization function is used with optional choices of optimization algorithms in it. However, a user can also choose within the function \code{midas_r} other procedures available in \proglang{R} such as \code{nls}, customizing the desired algorithm which is suitable for the problem at hand.
 
-The efficiency of the estimator and consistency of the standard errors depend on whether the errors of the model are spherical. We leave the aspect of efficiency of estimation to be considered by a user, however the implementation of heteroscedasticity and autocorrelation (HAC) robust standard errors is an option available in the package \pkg{sandwich} (see \citealp{zeileis:2004}).
+The efficiency of the estimator and consistency of the standard errors depend on whether the errors of the model are spherical. We leave the aspect of efficiency of estimation to be considered by a user, however the implementation of heteroscedasticity and autocorrelation (HAC) robust standard errors is an option available in the package \pkg{sandwich} (see \citealp{zeileis:2004}, \citealp{zeileis:2006}).
 
-If all the functional relations $f_i(\cdot)$ were non-constraining identity mappings, then the NLS estimator would be equivalent to the ordinary least squares (OLS) problem in terms of the original parameters. For convenience, such a U-MIDAS version can be dealt with directly using a different function \code{midas_u} of the package (see an illustration in section \ref{Implementation}) or a standard \code{lm} function, provided the alignment of data frequencies is performed as discussed in the previous section.
+If all the functional relations $f_i(\cdot)$ were non-constraining identity mappings, then the NLS estimator would be equivalent to the ordinary least squares (OLS) problem in terms of the original parameters. For convenience, such a U-MIDAS version can be dealt with directly using a different function \code{midas_u} of the package (see an illustration in the Section \ref{Implementation}) or a standard \code{lm} function, provided the alignment of data frequencies is performed as discussed in the previous section.
 
 \subsection{Taxonomy of aggregates-based MIDAS regression models}
 Based on the parsimony of representation argument, the higher-frequency part of conditional expectation of MIDAS regressions is often formulated in terms of aggregates as follows
@@ -464,12 +466,12 @@ where $X_{t-r}=\sum_{j=0}^{m_i-1}\beta_jx_{(t-r)m-j}$.
 \end{align*}
 \end{enumerate}
 
-The parametric restriction is usually placed on coefficients $\beta_j$ in these representations in the usual manner of \eqref{l:eqres}, i.e. it is assumed that $\beta_j=f(\gaga,j)$, for chosen function $f$ with parameters $\gaga$.
+The parametric restriction is usually placed on coefficients $\beta_j$ in these representations in the usual manner of \eqref{l:eqres}, i.e., it is assumed that $\beta_j=f(\gaga,j)$, for chosen function $f$ with parameters $\gaga$.
 
 If we compare these representations with \eqref{l:eqintro} the notable differences are the specification of $y_{t+1}$ instead of $y_t$ as a response variable and 
 a preference to make maximum high frequency lag be a multiple of the corresponding  frequency. The multiplicative MIDAS is the special case of aggregates based MIDAS specification. It is evident then that all these representations are special cases of \eqref{l:eqintro}.
 
-Various examples illustrating MIDAS regressions specifications together with corresponding \proglang{R} code are also given in the table \ref{tab:3}. 
+Various examples illustrating MIDAS regressions specifications together with corresponding \proglang{R} code are also given in the Table \ref{tab:3}. 
 
 
 \section{Implementation in {midasr} package}\label{Implementation}
@@ -577,48 +579,48 @@ Suppose now that we have (only) observations of $y,$ $x,$ and $z$ which are stor
 The OLS estimation as in case a) is straightforwardly performed using
 
 <<echo=TRUE,cache=TRUE, results="hide">>=
-eq.u<-lm(y~trend+mls(x,k=0:7,m=4)+mls(z,k=0:16,m=12))
+eq_u<-lm(y~trend+mls(x,k=0:7,m=4)+mls(z,k=0:16,m=12))
 @ 
 or, equivalently
 <<echo=TRUE,cache=TRUE, results="hide">>=
-eq.u<-midas_r(y~trend+mls(x,0:7,4)+mls(z,0:16,12),start=NULL)
+eq_u<-midas_r(y~trend+mls(x,0:7,4)+mls(z,0:16,12),start=NULL)
 @ 
 Note that in this case, \code{midas_r} picks up the variables from the global R environment. It is possible to pass the data explicitly:
 <<echo=TRUE,cache=TRUE, results="hide">>=
-eq.u<-midas_r(y~trend + mls(x,0:7,4)+mls(z,0:16,12),start=NULL,
+eq_u<-midas_r(y~trend + mls(x,0:7,4)+mls(z,0:16,12),start=NULL,
               data = list(y=y,trend=trend,x=x,z=z))
 @ 
 The variables of the same frequency can reside in the same \code{data.frame}:
 <<echo=TRUE,cache=TRUE, results="hide">>=
-eq.u<-midas_r(y~trend + mls(x,0:7,4)+mls(z,0:16,12),start=NULL,
+eq_u<-midas_r(y~trend + mls(x,0:7,4)+mls(z,0:16,12),start=NULL,
               data = list(data.frame(y=y,trend=trend),x=x,z=z))
 @ 
 In this case, there is no need to name the \code{data.frame} element in the list.
 
 The following \proglang{R} code estimates the constrained case b) using the function \code{midas_r} and reports the NLS estimates $\widehat{\gaga}$ of parameters with the related summary statistics.
 <<echo=TRUE,cache=TRUE, results="markup">>=
-eq.r<-midas_r(y~trend+mls(x,0:7,4,nealmon)+mls(z,0:16,12,nealmon),start=list(x=c(1,-0.5),z=c(2,0.5,-0.1)))
-summary(eq.r)
+eq_r<-midas_r(y~trend+mls(x,0:7,4,nealmon)+mls(z,0:16,12,nealmon),start=list(x=c(1,-0.5),z=c(2,0.5,-0.1)))
+summary(eq_r)
 @ 
 
 As you can see the syntax of the function \code{midas_r} is similar to the standard \proglang{R} function \code{nls}. The model is specified via familiar \code{formula} interface. The lags included and functional restriction used can be individual to each variable and are specified within the respective \code{mls}, \code{fmls}, or \code{dmls} function used with \code{midas_r}. It is necessary to provide a list of starting values for each variable with restricted coefficients, since it implicitly defines the number of parameters of the constraint functions to be used for each series.
 
-The main difference with the function \code{nls} is that there is a greater choice of numerical optimization algorithms. The function \code{midas_r} is written in a way that in theory it can use any \proglang{R} optimization function. The choice is controlled via \code{Ofunction} argument. Currently it is possible to use functions \code{optim} and \code{nls} which are present in a standard \proglang{R} installation and function \code{optimx} from the package \pkg{optimx} \cite{optimx}. The additional arguments to the aforementioned functions can be specified directly in the call to \code{midas_r}. So for example if we want to use the optimization algorithm of Nelder and Mead, which is the default option in the function \code{optim} we use the following code
-<<eval=FALSE,echo=TRUE,cache=TRUE, results="markup", tidy=FALSE>>=
+The main difference with the function \code{nls} is that there is a greater choice of numerical optimization algorithms. The function \code{midas_r} is written in a way that in theory it can use any \proglang{R} optimization function. The choice is controlled via \code{Ofunction} argument. Currently it is possible to use functions \code{optim} and \code{nls} which are present in a standard \proglang{R} installation and function \code{optimx} from the package \pkg{optimx} \cite{optimx}, \cite{optimx2}. The additional arguments to the aforementioned functions can be specified directly in the call to \code{midas_r}. So for example if we want to use the optimization algorithm of Nelder and Mead, which is the default option in the function \code{optim} we use the following code
+<<eval=FALSE,echo=TRUE,cache=TRUE, results="markup">>=
 eq_r2 <- midas_r(y ~ trend + mls(x, 0:7, 4, nealmon) + 
                  mls(z, 0:16, 12, nealmon),
                  start = list(x = c(1, -0.5), z = c(2, 0.5, -0.1)),
                  Ofunction = "optim", method = "Nelder-Mead")
 @ 
 If we want to use  Golub-Pereyra algorithm for partially linear least-squares models implemented in the  function \code{nls} we use the following code
-<<eval=FALSE,echo=TRUE,cache=TRUE, results="markup",tidy=FALSE>>=
+<<eval=FALSE,echo=TRUE,cache=TRUE, results="markup">>=
 eq_r2 <- midas_r(y ~ trend + mls(x, 0:7, 4, nealmon) + 
                  mls(z, 0:16, 12, nealmon),
                  start = list(x = c(1,-0.5), z = c(2, 0.5, -0.1)),              
                  Ofunction = "nls", method = "plinear")
 @ 
 It is possible to re-estimate the NLS problem with the different algorithm using as starting values the final solution of the previous algorithm. For example it is known, that the default algorithm in \code{nls} is sensitive to starting values. So first we can use the standard Nelder-Mead algorithm to find ``more feasible'' starting values and then use the \code{nls} to get the final result:
-<<eval=FALSE,echo=TRUE,cache=TRUE, results="markup",tidy=FALSE>>=
+<<eval=FALSE,echo=TRUE,cache=TRUE, results="markup">>=
 eq_r2 <- midas_r(y ~ trend + mls(x, 0:7, 4, nealmon) + 
                  mls(z, 0:16, 12, nealmon),
                  start = list(x = c(1, -0.5), z = c(2, 0.5, -0.1)),
@@ -627,7 +629,7 @@ eq_r2 <- update(eq_r2, Ofunction = "nls")
 @ 
 
 The output of the optimization function used can be found by inspecting the element \code{opt} of \code{midas_r} output.
-<<eval=TRUE,echo=TRUE,cache=TRUE, results="markup", tidy=FALSE>>=
+<<eval=TRUE,echo=TRUE,cache=TRUE, results="markup">>=
 eq_r2 <- midas_r(y ~ trend + mls(x, 0:7, 4, nealmon) + 
                  mls(z, 0:16, 12, nealmon),
                  start = list(x = c(1, -0.5), z = c(2, 0.5, -0.1)),
@@ -637,13 +639,13 @@ eq_r2$opt
 Here we observe that the Nelder-Mead algorithm evaluated the cost function 502 times.
 
 The optimization functions in \proglang{R} report the status of the convergence of optimization algorithm by the numeric constant, 0 indicating succesful convergence. This code is reported as the element \code{convergence} of the \code{midas_r} output.
-<<eval=TRUE,echo=TRUE,cache=TRUE, results="markup", tidy=FALSE>>=
+<<eval=TRUE,echo=TRUE,cache=TRUE, results="markup">>=
 eq_r2$convergence
 @ 
 In this case the convergence was not successfull. The help page of the function \code{optim} indicates that convergence code 1 means that the iteration limit was reached.
 
 In order to improve the convergence it is possible to use user defined gradient functions. To use them it is necessary to define gradient function of the restriction. For example for the \code{nealmon} restriction the gradient function is defined in the following way:
-<<eval=TRUE,echo=TRUE,cache=TRUE,resuls="markup",tidy=FALSE>>=
+<<eval=TRUE,echo=TRUE,cache=TRUE,resuls="markup">>=
 nealmon_gradient <- function(p, d, m) {
     i <- 1:d
     pl <- poly(i, degree = length(p) - 1, raw = TRUE)
@@ -654,24 +656,24 @@ nealmon_gradient <- function(p, d, m) {
 }
 @ 
 The gradient functions are passed as named list elements via argument \code{weight_gradients} :
-<<eval=TRUE,echo=TRUE,cache=TRUE,results="markup",tidy=FALSE>>=
+<<eval=TRUE,echo=TRUE,cache=TRUE,results="markup">>=
 eq_r2 <- midas_r(y ~ trend + mls(x, 0:7, 4, nealmon) + 
                  mls(z, 0:16, 12, nealmon),
                  start = list(x = c(1, -0.5), z = c(2, 0.5, -0.1)),
                  weight_gradients=list(nealmon = nealmon_gradient))
 @ 
-This way \code{midas_r} calculates the exact gradient of the NLS problem ~\eqref{eqNLS} using the specified gradient function of the restriction. For all the types of the restrictions referenced in table \ref{tab:3} their gradient functions are specified in the package \pkg{midasr}. The naming convention for gradient functions is \code{restriction_name_gradient}. It is not necessary to explicitly pass gradient functions named according to this convention. If \code{weight_gradients} is not \code{NULL} and does not contain the apropriately named element, it is assumed that there exists a gradient function conforming to the gradient naming convention which is then subsequently used.
+This way \code{midas_r} calculates the exact gradient of the NLS problem ~\eqref{eqNLS} using the specified gradient function of the restriction. For all the types of the restrictions referenced in Table \ref{tab:3} their gradient functions are specified in the package \pkg{midasr}. The naming convention for gradient functions is \code{restriction_name_gradient}. It is not necessary to explicitly pass gradient functions named according to this convention. If \code{weight_gradients} is not \code{NULL} and does not contain the apropriately named element, it is assumed that there exists a gradient function conforming to the gradient naming convention which is then subsequently used.
 
 The gradient and the hessian of the NLS problem are supplied as the output of \code{midas_r}. The gradient is calculated exactly if appropriate gradients for weight functions are supplied as explained above, otherwise the numerical approximation of the gradient is calculated using the package \pkg{numDeriv} \cite{numderiv}. For hessian the numerical approximation is always used. Having the gradient and hessian calculated allows to check whether the necessary and sufficient conditions for the convergence are satisfied. This is performed by the function \code{deriv_test} which calculates the Euclidean norm of the gradient and the eigenvalues of the hessian. It then tests whether the norm of gradient is close to zero and whether the eigenvalues are positive.
 
 
 <<echo=TRUE,cache=TRUE, results="markup">>=
-deriv_tests(eq.r, tol = 1e-06)
+deriv_tests(eq_r, tol = 1e-06)
 @ 
 
-To retrieve a vector of constrained estimates  $\tilde\theta$ (and, hence, also $\hat\ff=\ff_{\gaga}\big|_{{\gaga}=\widehat{\gaga}}$) which.min corresponds to the vector ${\thth}$ ({\bebe}, respectively), the function \code{coef} can be used as follows
+To retrieve a vector of constrained estimates  $\tilde\theta$ (and, hence, also $\hat\ff=\ff_{\gaga}\big|_{{\gaga}=\widehat{\gaga}}$) which corresponds to the vector ${\thth}$ ({\bebe}, respectively), the function \code{coef} can be used as follows
 <<echo=TRUE,cache=TRUE, results="markup">>=
-coef(eq.r, midas = TRUE)
+coef(eq_r, midas = TRUE)
 @ 
 
 In the example provided above, a functional constraint was imposed directly on  $\bebe(L)$ terms corresponding to each series without the usage of aggregates. Relying on the relationship \eqref{eq6}, it is always possible to write such an explicit general constraint from an aggregates-based one. For convenience of a user, the function \code{amweights} can be used to form several standard periodic functional constraints with 'typical'  restrictions explicated in equation \eqref{eq4}. For instance,
@@ -679,7 +681,7 @@ In the example provided above, a functional constraint was imposed directly on  
 <<echo=TRUE,cache=TRUE, results="markup">>=
 amweights(p=c(1,-0.5),d=8,m=4,weight=nealmon,type="C")
 @ 
-with \code{type="C"} corresponds to a fully restricted version of aggregates-based expression \eqref{eq4} apart the cross-restriction on the equality of weighting schemes between different variables/frequencies. Note that the code above repeats the result of
+with \code{type="C"} corresponds to a fully restricted version of aggregates-based expression \eqref{eq4} apart the cross-restriction on the equality of weighting schemes between different \newline variables/frequencies. Note that the code above repeats the result of
 <<echo=TRUE,cache=TRUE, results="markup">>=
 nealmon(p=c(1,-0.5),d=4)
 @ 
@@ -752,15 +754,15 @@ Table \ref{tab:3} summarizes and provides various other examples of corresponden
 \subsection{Adequacy testing of restrictions}
 Given a MIDAS regression model estimated with \code{midas_r}, the empirical adequacy of the functional restrictions can be tested under quite standard assumptions (see \citealp{kvedaras:2012} and  \citealp{kvedaras:2013}) using  functions \code{hAh_test} and \code{hAhr_test} of the package. In the case of a stationary series $\{y_t\}$ they can be applied directly, whereas whenever $\{y_t\}$ is cointegrated with explanatory variables, a special transformation needs to be applied before the testing (see e.g., \citealp{bilinskas:2013}). The \code{hAh_test} can be used whenever errors of the process are independently and identically distributed, whereas the \code{hAhr_test} uses a HAC-robust version of the test. We should just point out that, whenever no significant HAC in the residuals  are observed, we would suggest using \code{hAh_test} which would then have more precise test sizes in small samples. In the case of integrated series $\{y_t\}$ which is co-integrated with explanatory variables, some other alternatives are available (see \citealp{kvedaras:2013b}).
 
-For illustration, let us use the name \code{eq.r} of an estimated model as in the previous subsections. Then the functions produce, respectively,
+For illustration, let us use the name \code{eq_r} of an estimated model as in the previous subsections. Then the functions produce, respectively,
 <<echo=TRUE,cache=TRUE, results="markup">>=
-hAh_test(eq.r)
-hAhr_test(eq.r)
+hAh_test(eq_r)
+hAhr_test(eq_r)
 @
 Here the value of a test statistic, the degrees of freedom (the number of binding constraints on parameters in equation \eqref{eq1}), and the empirical significance of the null hypothesis that a functional constraint is adequate are reported.
 
 As can be seen, such a specification, which in fact corresponds to the underlying DGP, cannot be rejected at the usual significance levels, whereas e.g., reducing the number of parameters of functional constraint of variable $z$ to only two instead of three is quite strongly rejected using either version of the test:
-<<echo=TRUE,cache=TRUE, results="markup",tidy=FALSE>>=
+<<echo=TRUE,cache=TRUE, results="markup">>=
 eq_rb <- midas_r(y ~ trend + mls(x, 0:7, 4, nealmon) + 
                  mls(z, 0:12, 12, nealmon),
                  start = list(x = c(1, -0.5), z = c(2, -0.1)))
@@ -774,7 +776,7 @@ Whenever the empirical adequacy  cannot be reject at some appropriate level of s
 
 \subsection{Model selection}
 Suppose that we want to investigate which out of several functional constraints---for instance, the normalized ("nealmon") or non-normalized ("almonp") exponential Almon lag polynomials, or with polynomial of order 2 or 3, and so on---are better suited in a MIDAS regression model of $y$ on $x$ and $z$ (possibly different for each variable). Since the best maximum number of lags can differ with a functional constraint and/or variable/frequency, let us first define using the \pkg{midasr} function \code{expand_weights_lags} the sets of potential models corresponding to each explanatory variable  as follows % and the autoregressive terms of $y$ ;
-<<echo=TRUE,cache=TRUE, results="markup",tidy=FALSE>>=
+<<echo=TRUE,cache=TRUE, results="markup">>=
 set_x <- expand_weights_lags(weights = c("nealmon", "almonp"),
                              from = 0, to = c(5, 10), m = 1,
                              start = list(nealmon = c(1, -1), 
@@ -788,7 +790,7 @@ Here, for each variable, vector (or list) \code{weights} defines the potential r
 
 The potential lag structures are given by the following ranges of high-frequency lags: from [\code{from}; \code{m}$*\min$(\code{to})] to [\code{from}; \code{m}$*\max$(\code{to})]. When aggregates-based modeling is involved using \code{amweights} in \code{midas_r}, \code{m} can be set to the frequency ratio which ensures that the considered models (lag structures) are multiples of it. Otherwise, we would recommend to operate with high-frequency lag structures without changing the default value $m=1.$
 Then, the set of potential models is defined as all possible different combinations of functions and lag structures with a corresponding set of starting values. A simple example bellow illustrates the result in order to reveal the underlying structure, which, besides the understanding of it, is otherwise not needed for a user.
-<<echo=TRUE,cache=TRUE, results="markup",tidy=FALSE>>=
+<<echo=TRUE,cache=TRUE, results="markup">>=
 expand_weights_lags(weights = c("nealmon", "nbeta"),
                     from = 1, to = c(2, 3), m = 1,
                     start = list(nealmon = c(1, -1), 
@@ -829,7 +831,7 @@ which also prints the usual summary statistics as well as the testing of adequac
 
 \subsection{Forecasting}
 
-Conditional forecasting (with confidence intervals, etc.) using unrestricted U-MIDAS regression models which are estimated using \code{lm} can be performed using standard \proglang{R} functions e.g.,  \code{predict.lm}. Conditional point prediction given a specific model is also possible relying on a standard \code{predict} function.
+Conditional forecasting (with prediction intervals, etc.) using unrestricted U-MIDAS regression models which are estimated using \code{lm} can be performed using standard \proglang{R} functions e.g.,  \code{predict.lm}. Conditional point prediction given a specific model is also possible relying on a standard \code{predict} function.
 
 The function \code{predict} works similarly to \code{predict.lm}. It takes the new data, transforms it into an appropriate matrix and multiplies it with the coefficients. Suppose we want to produce the forecast $\hat{y}_{T+1|T}$  for the model \eqref{eq9}. To produce this forecast we need the data $x_{4(T+1)},...,x_{4T-3}
 $ and $z_{12(T+1)},...,z_{12T-4}.$ It would be tedious to calculate precisely the required data each time we want to perform a forecasting exercise. To alleviate this problem the package \pkg{midasr} provides the function \code{forecast}. This function assumes that the model was estimated with the data up to low frequency index $T.$ It is then assumed that the new data is the data after the low frequency $T$ and then calculates the appropriate forecast. For example suppose that we have new data for one low frequency period for the model \eqref{eq9}. Here is how the forecast for one period would look like:
@@ -866,23 +868,23 @@ For instance, for variable $x,$ three pairs $(14,19),(18,23),$ and $(22,27)$ cor
 \begin{itemize}
 \item[$\ell=1:$]  \ \ from $[4-14]$ to $[4-19],$ \item[$\ell=2:$]  \ \ from $[8-18]$ to $[8-23],$ \item[$\ell=3:$]  \ \ from $[12-22]$ to $[12-27].$ \end{itemize}
 
-The other options of the function \code{select_and_forecast} are options of functions \code{midas_r_ic_table}, \code{modsel} and \code{average_forecast}.
+The other options of the function \code{select_and_forecast} are options of functions\newline \code{midas_r_ic_table}, \code{modsel} and \code{average_forecast}.
 
 <<eval = FALSE, echo = TRUE, cache = TRUE, results = "hide", tidy = FALSE>>=
 cbfc <- select_and_forecast(
-           y ~ trend + mls(x, 0, 4) + mls(z, 0, 12),
-           from = list(x = c(4, 8, 12), z = c(12, 24, 36)),
-           to = list(x = rbind(c(14, 19), c(18, 23), c(22, 27)),
-                     z = rbind(c(22, 27), c(34, 39), c(46, 51))),
-           insample = 1:200, outsample = 201:250,
-           weights = list(x = c("nealmon", "almonp"),
-                          z = c("nealmon", "almonp")),
-           wstart = list(nealmon = rep(1, 3), almonp = rep(1, 3)),
-           IC = "AIC", seltype = "restricted", ftype = "fixed",                          
-           measures = c("MSE", "MAPE", "MASE"),
-           fweights = c("EW", "BICW", "MSFE", "DMSFE"))
+  y ~ trend + mls(x, 0, 4) + mls(z, 0, 12),
+  from = list(x = c(4, 8, 12), z = c(12, 24, 36)),
+  to = list(x = rbind(c(14, 19), c(18, 23), c(22, 27)), 
+            z = rbind(c(22, 27), c(34, 39), c(46, 51))),
+  insample = 1:200, outsample = 201:250,
+  weights = list(x = c("nealmon", "almonp"),
+                 z = c("nealmon", "almonp")),
+  wstart = list(nealmon = rep(1, 3), almonp = rep(1, 3)),
+  IC = "AIC", seltype = "restricted", ftype = "fixed",                          
+  measures = c("MSE", "MAPE", "MASE"),
+  fweights = c("EW", "BICW", "MSFE", "DMSFE"))
 @
-The names of weighting schemes are taken from MIDAS \proglang{Matlab} toolbox \cite{ghysels:2013}. Similarly forecasting using rolling and recursive model estimation samples defined therein \cite{ghysels:2013} is supported by setting option \code{seltype = "rolling"} or \code{seltype = "recursive"}.
+The names of weighting schemes are taken from MIDAS \proglang{MATLAB} toolbox \cite{ghysels:2013}. Similarly forecasting using rolling and recursive model estimation samples defined therein \cite{ghysels:2013} is supported by setting option \code{seltype = "rolling"} or\newline \code{seltype = "recursive"}.
 
 Then, among others,
 <<eval=FALSE,echo=TRUE,cache=TRUE, results="markup">>=
@@ -901,8 +903,8 @@ The above example illustrated a general usage of the function \code{select_and_f
 \item \code{mls(x,4:12,4,nealmon)} with parameters \code{x=c(2,10,1,-0.1)} (the first one representing an impact parameter and the last three being the parameters of the normalized weighting function), and
 \item \code{mls(z,12:20,12,nealmon)} with parameters \code{z=c(-1,2,-0.1)} i.e., with one parameter less in the weighting function.
 \end{itemize}
-Given already preselected and evaluated models, user can use the function \code{average_forecast} to evaluate the forecasting performance. To use this function at first it is necessary to fit the model and then pass it to function \code{average_forecast} specifying the in-sample and out-of-sample data, accuracy measures and weighting scheme in a similar manner to \code{select_and_forecast}
-<<eval = FALSE, echo = TRUE, cache = TRUE, results = "markup", tidy = FALSE, label = avgf>>=
+Given already preselected and evaluated models, user can use the function \code{average_forecast} to evaluate the forecasting performance. To use this function at first it is necessary to fit the model and then pass it to function \code{average_forecast} specifying the in-sample and out-of-sample data, accuracy measures and weighting scheme in a similar manner to\newline \code{select_and_forecast}
+<<eval = FALSE, echo = TRUE, cache = TRUE, results = "markup", label = avgf>>=
 mod1 <- midas_r(y ~ trend + mls(x, 4:14, 4, nealmon) + 
                 mls(z, 12:22, 12, nealmon),
                 start = list(x = c(10, 1, -0.1), z = c(2, -0.1)))
@@ -914,7 +916,7 @@ avgf <- average_forecast(list(mod1),
                          fweights = c("EW", "BICW", "MSFE", "DMSFE"))
 @ 
 
-It should also be pointed out that the forecast combinations in the function \code{select_and_forecast} are obtained only from the forecasts linked to different restriction functions on parameters. The forecasts related to different lag specifications are not combined, but the best lag order is chosen in terms of a given information criterion.
+It should also be pointed out that the forecast combinations in the function \newline\code{select_and_forecast} are obtained only from the forecasts linked to different restriction functions on parameters. The forecasts related to different lag specifications are not combined, but the best lag order is chosen in terms of a given information criterion.
 If there is a need to get forecast combinations for a group of models which the user selected using other criteria, the function \code{average_forecast} should be used in a manner outlined in the previous example.
 
 \section{Empirical illustrations}
@@ -973,7 +975,7 @@ coef(um)
 @ 
 We can evaluate the forecasting performance of these three models on the out of sample data, containing 9 quarters, from 2009Q2 to 2011Q2
 
-<<echo = TRUE, cache = TRUE, results = "markup", tidy = FALSE, label = "gdp_avgf">>=
+<<echo = TRUE, cache = TRUE, results = "markup", label = "gdp_avgf">>=
 fulldata <- list(xx = window(nx, start = c(1985, 1), end = c(2011, 6)),
                  yy = window(ny, start = c(1985, 1), end = c(2011, 2)))
 insample <- 1:length(yy)
@@ -1066,18 +1068,18 @@ regression with their corresponding 95\% confidence bounds.
 For the exponential Almon lag specification we can choose the number
 of lags via AIC or BIC. 
 
-<<echo = TRUE, cache = TRUE, results = "markup", tidy = FALSE, label = "rv_select">>=
+<<echo = TRUE, cache = TRUE, results = "markup", label = "rv_select">>=
 tb <- expand_weights_lags("nealmon", from = 1, to = c(5, 15),
-                          start = list(nealmon = c(0, 0, 0)))
+  start = list(nealmon = c(0, 0, 0)))
 mtb <- midas_r_ic_table(rv ~ mls(rv, 1:20, 1, nealmon),
-                        data = list(rv = spx2_rvol), table = list(rv = tb),
-                        test = "hAh_test",
-                        weight_gradients = list(), show_progress = FALSE)
+  data = list(rv = spx2_rvol), table = list(rv = tb),
+  test = "hAh_test",
+  weight_gradients = list(), show_progress = FALSE)
 mtb$candlist <- lapply(mtb$candlist, update, Ofunction = "nls")
 mtb$test <- "hAhr_test"
 mtb <- update(mtb)
 @
-Here we used two optimization methods to improve the convergence. The function \code{midas_r_ic_table} applies the \code{test} function for each  candidate model. The function \code{hAhr_test} takes a lot of computing time, especialy for models with larger number of lags, so we calculate it only for the second final step, and we restrict the number of lags choose from.  The AIC selects the model with 9 lags:
+Here we used two optimization methods to improve the convergence. The function \newline\code{midas_r_ic_table} applies the \code{test} function for each  candidate model. The function \code{hAhr_test} takes a lot of computing time, especialy for models with larger number of lags, so we calculate it only for the second final step, and we restrict the number of lags choose from.  The AIC selects the model with 9 lags:
 
 <<echo=TRUE,cache=TRUE>>=
 bm <- modsel(mtb)
@@ -1093,13 +1095,13 @@ We can look into the forecast performance of both models, using a
 rolling forecast with 1000 observation window. For comparison we also
 calculate the forecasts of an unrestricted AR(20) model.
 
-<<echo = TRUE, cache = TRUE, results = "markup", tidy = FALSE, label = "rv_avgf">>=
+<<echo = TRUE, cache = TRUE, results = "markup", label = "rv_avgf">>=
 ar20 <- midas_r(rv ~ mls(rv, 1:20, 1), data = list(rv = spx2_rvol), 
-                start = NULL)
+  start = NULL)
 forc <- average_forecast(list(ar20, mh, bm),
-                             data = list(rv = spx2_rvol),
-                             insample = 1:1000, outsample = 1001:1100,
-                             type = "rolling", show_progress = FALSE)
+  data = list(rv = spx2_rvol),
+  insample = 1:1000, outsample = 1001:1100,
+  type = "rolling", show_progress = FALSE)
 forc$accuracy$individual
 @
 We see that exponential Almon lag model slightly outperforms the
@@ -1127,7 +1129,7 @@ The data for this DGP was generated for low frequency sample sizes 50, 100, 200,
 
 This process was repeated 1000 times. The points in the figure are the averages of the replications. The code for generating the data can be found in the help page of a dataset \code{oos_prec} in the package \pkg{midasr}.
 
-\bibliographystyle{jss}
+%\bibliographystyle{jss}
 \bibliography{guideR}
 
 \end{document}
