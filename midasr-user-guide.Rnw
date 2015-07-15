@@ -29,10 +29,15 @@
   Zemlys\\Vilnius University}
 \Plainauthor{Eric Ghysels, Virmantas Kvedaras, Vaidotas Zemlys}
 
-\title{Mixed Frequency Data Sampling Regression Models: the \proglang{R}
-    Package \pkg{Midasr}}
-\Plaintitle{Mixed Frequency Data Sampling Regression Models: the R Package Midasr}
-\Shorttitle{R Package \pkg{Midasr}}
+\title{Mixed Frequency Data Sampling Regression Models: The \proglang{R}
+    Package \pkg{midasr}}
+\Plaintitle{Mixed Frequency Data Sampling Regression Models: The R
+    Package midasr}
+\Shorttitle{Mixed Frequency Data Sampling Regression Models: The \proglang{R}
+    Package \pkg{midasr}}
+
+%\Plaintitle{Mixed Frequency Data Sampling Regression Models: The R Package midasr}
+%\Shorttitle{R Package \pkg{midasr}}
 
 \Abstract{
  When modeling economic relationships it is increasingly common to encounter data sampled at different frequencies. We introduce \proglang{R} package \pkg{midasr} which enables estimating regression models with variables sampled at different frequencies within a MIDAS regression framework put forward in work by \citeasnoun{ghysels_etal_midas-02a}. In this article we define a general autoregressive MIDAS regression model with multiple variables of different frequencies and show how it can be specified using familiar R formula interface and estimated using various optimisation methods chosen by the researcher. We discuss how to check the validity of estimated model both in terms of numerical convergence and statistical adequacy of a chosen regression specification, how to do the model selection based on a information criteria, how to assess forecasting accuracy of the MIDAS regression model and do a forecast aggregation of different MIDAS regression models. We illustrate capabilities of the package with a simulated MIDAS regression model and give two empirical examples of application of MIDAS regression.}
@@ -866,7 +871,10 @@ In general, the definition of potential models in the function \code{select_and_
 Suppose that, as in the previous examples, we have variables $x$ and $z$ with frequency ratios $m_1=4$ and $m_2=12,$ respectively. Suppose that we intend to consider forecasting of $y$ up to three low-frequency periods $\ell\in\{1,2,3\}$ ahead. It should be noted that, in terms of high-frequency periods, they correspond to $\ell m_1\in\{4,8,12\}$ for variable $x,$ and $\ell m_2\in\{12,24,36\}$ for variable $z.$  Thus these variable-specific vectors define the lowest lags\footnote{Including lags smaller than that would imply that more information on explanatory variables is available and, in fact, $\ell-1$ forecasting horizon is actually under consideration.} of high-frequency period to be considered for each variable in the respective forecasting model (option \code{from} in the function \code{select_and_forecast}). Suppose further that in all the models we want to consider specifications having not less than 10 high-frequency lags and not more than 15 for each variable. This defines the maximum high-frequency lag of all potential models considered for each low-frequency horizon period $\ell\in\{1,2,3\}.$ Hence, for each variable, three corresponding pairs $(\ell m_1+10,\ell m_1+15),\ \ell\in\{1,2,3\}$ will define the upper bounds of ranges to be considered (option \code{to} in the function \code{select_and_forecast}).
 For instance, for variable $x,$ three pairs $(14,19),(18,23),$ and $(22,27)$ correspond to $\ell=1,2,$ and $3$ and together with that defined in option \code{from} (see  \code{x=(4,8,12)}) imply that the following ranges of potential models will be under consideration for variable $x$:
 \begin{itemize}
-\item[$\ell=1:$]  \ \ from $[4-14]$ to $[4-19],$ \item[$\ell=2:$]  \ \ from $[8-18]$ to $[8-23],$ \item[$\ell=3:$]  \ \ from $[12-22]$ to $[12-27].$ \end{itemize}
+\item[$\ell=1:$]  from $[4-14]$ to $[4-19],$ 
+\item[$\ell=2:$]  from $[8-18]$ to $[8-23],$ 
+\item[$\ell=3:$]  from $[12-22]$ to $[12-27].$ 
+\end{itemize}
 
 The other options of the function \code{select_and_forecast} are options of functions\newline \code{midas_r_ic_table}, \code{modsel} and \code{average_forecast}.
 
@@ -875,10 +883,9 @@ cbfc <- select_and_forecast(
   y ~ trend + mls(x, 0, 4) + mls(z, 0, 12),
   from = list(x = c(4, 8, 12), z = c(12, 24, 36)),
   to = list(x = rbind(c(14, 19), c(18, 23), c(22, 27)), 
-            z = rbind(c(22, 27), c(34, 39), c(46, 51))),
+  z = rbind(c(22, 27), c(34, 39), c(46, 51))),
   insample = 1:200, outsample = 201:250,
-  weights = list(x = c("nealmon", "almonp"),
-                 z = c("nealmon", "almonp")),
+  weights = list(x = c("nealmon", "almonp"), z = c("nealmon", "almonp")),
   wstart = list(nealmon = rep(1, 3), almonp = rep(1, 3)),
   IC = "AIC", seltype = "restricted", ftype = "fixed",                          
   measures = c("MSE", "MAPE", "MASE"),
@@ -1068,7 +1075,7 @@ regression with their corresponding 95\% confidence bounds.
 For the exponential Almon lag specification we can choose the number
 of lags via AIC or BIC. 
 
-<<echo = TRUE, cache = TRUE, results = "markup", label = "rv_select">>=
+<<echo = TRUE, cache = TRUE, results = "markup", label = "rv_select", tidy = FALSE>>=
 tb <- expand_weights_lags("nealmon", from = 1, to = c(5, 15),
   start = list(nealmon = c(0, 0, 0)))
 mtb <- midas_r_ic_table(rv ~ mls(rv, 1:20, 1, nealmon),
@@ -1079,7 +1086,7 @@ mtb$candlist <- lapply(mtb$candlist, update, Ofunction = "nls")
 mtb$test <- "hAhr_test"
 mtb <- update(mtb)
 @
-Here we used two optimization methods to improve the convergence. The function \newline\code{midas_r_ic_table} applies the \code{test} function for each  candidate model. The function \code{hAhr_test} takes a lot of computing time, especialy for models with larger number of lags, so we calculate it only for the second final step, and we restrict the number of lags choose from.  The AIC selects the model with 9 lags:
+Here we used two optimization methods to improve the convergence. The function \newline\code{midas_r_ic_table} applies the \code{test} function for each  candidate model. The function \newline\code{hAhr_test} takes a lot of computing time, especialy for models with larger number of lags, so we calculate it only for the second final step, and we restrict the number of lags choose from.  The AIC selects the model with 9 lags:
 
 <<echo=TRUE,cache=TRUE>>=
 bm <- modsel(mtb)
