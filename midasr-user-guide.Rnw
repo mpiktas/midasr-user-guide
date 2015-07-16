@@ -81,7 +81,7 @@ URL:\url{http://mif.vu.lt/~zemlys/}
 
 \section{Introduction}
 
-Regression models involving data sampled at different frequencies are of general interest. In this document we introduce a \proglang{R} package \pkg{midasr} for the regression modeling with the mixed frequency data based on a framework put forward in recent work by \citeasnoun{ghysels_etal_midas-02a}, \citeasnoun{ghysels_etal_midas-joe} and
+Regression models involving data sampled at different frequencies are of general interest. In this document we introduce a new \proglang{R} \citep{Rcore} package \pkg{midasr} \citep{midasr} for the regression modeling with the mixed frequency data based on a framework put forward in recent work by \citeasnoun{ghysels_etal_midas-02a}, \citeasnoun{ghysels_etal_midas-joe} and
 \citeasnoun{andreou:rmm} using so called MIDAS, meaning Mi(xed) Da(ta) S(ampling), regressions.
 
 In a general framework of regressions with functional constraints on parameters, the \pkg{midasr} package not only provides similar functionality within a standard \proglang{R} framework of the model specification comparable to that available in the usual functions \code{lm} or \code{nls}, but also deals with an extended model specification analysis for MIDAS regressions.
@@ -245,7 +245,7 @@ Let us examine another example. Suppose we have another variable $z_t$ observed 
 	\eps_n
     \end{bmatrix}
 \end{align*}
-In this example we have aligned $x_{\tau}$ into a vector $(x_{3t},..,x_{3t-5})^\top$ and $z_{\tau}$ into a vector $(z_{12t},\dots,z_{12t-23})^\top.$ Again we require that the number of observations of high frequency variables are multiple of $n$, with multiplication factor being the corresponding frequencies. This is not a restrictive assumption in practical applications as will be further explained in the Section \ref{Implementation}.
+In this example we have aligned $x_{\tau}$ into a vector $(x_{3t},..,x_{3t-5})^\top$ and $z_{\tau}$ into a vector\newline $(z_{12t},\dots,z_{12t-23})^\top.$ Again we require that the number of observations of high frequency variables are multiple of $n$, with multiplication factor being the corresponding frequencies. This is not a restrictive assumption in practical applications as will be further explained in the Section \ref{Implementation}.
 
 Let us return to the general case of the model \eqref{l:eqintro}. We \textit{align the frequency} of high-frequency variable $x_\tau$ by transforming it to the low-frequency vector $(x_{tm_i}^{(i)},x_{tm_i-1}^{(i)},\dots,x_{tm_i-l}^{(i)})^\top$. The model $\eqref{l:eqintro}$ is then expressed in the matrix notation as follows:
 \begin{align*}
@@ -590,7 +590,7 @@ or, equivalently
 <<echo=TRUE,cache=TRUE, results="hide">>=
 eq_u<-midas_r(y~trend+mls(x,0:7,4)+mls(z,0:16,12),start=NULL)
 @ 
-Note that in this case, \code{midas_r} picks up the variables from the global R environment. It is possible to pass the data explicitly:
+Note that in this case, \code{midas_r} picks up the variables from the global \proglang{R} environment. It is possible to pass the data explicitly:
 <<echo=TRUE,cache=TRUE, results="hide">>=
 eq_u<-midas_r(y~trend + mls(x,0:7,4)+mls(z,0:16,12),start=NULL,
               data = list(y=y,trend=trend,x=x,z=z))
