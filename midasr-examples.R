@@ -190,17 +190,16 @@ cbfc$bestlist
 # MIDAS Matlab toolbox example ----------------------------------------------------------------------
 
 ##  Get the data
-library(quantmod)
-gdp <- getSymbols("GDP", src = "FRED", auto.assign = FALSE)
-payems <- getSymbols("PAYEMS", src = "FRED", auto.assign = FALSE)
+data("USqgdp")
+data("USpayems")
 
 ## Convert to ts with the exact sample used in MIDAS Matlab toolbox
-y <- window(ts(gdp, start = c(1947, 1), frequency = 4), end = c(2011, 2))
-x <- window(ts(payems, start = c(1939, 1), frequency = 12), end = c(2011, 7))
+y <- window(USqgdp, end = c(2011, 2))
+x <- window(USpayems, end = c(2011, 7))
 
 ## Calculate the log differences
-yg <- log(y/lag(y, -1)) * 100
-xg <- log(x/lag(x, -1)) * 100
+yg <- diff(log(y))*100
+xg <- diff(log(x))*100
 
 ## Align data
 nx <- ts(c(NA, xg, NA, NA), start = start(x), frequency = 12)
@@ -218,7 +217,6 @@ yy <- window(ny, start = c(1985, 1), end = c(2009, 1))
 
 ## Estimate the models
 beta0 <- midas_r(yy ~ mls(yy, 1, 1) + mls(xx, 3:11, 3, nbeta), start = list(xx = c(1.7, 1, 5)))
-
 coef(beta0)
 
 ## Note the nbetaMT, which is different form nbeta
